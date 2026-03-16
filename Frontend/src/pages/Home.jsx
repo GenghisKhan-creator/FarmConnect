@@ -53,7 +53,7 @@ export default function Home() {
       }
 
       // Feature cards
-      gsap.fromTo('.feature-card', 
+      gsap.fromTo('.feature-card',
         { opacity: 0, y: 40 },
         {
           opacity: 1,
@@ -65,7 +65,7 @@ export default function Home() {
       );
 
       // Product cards
-      gsap.fromTo('.product-anim', 
+      gsap.fromTo('.product-anim',
         { opacity: 0, y: 30 },
         {
           opacity: 1,
@@ -77,10 +77,10 @@ export default function Home() {
       );
 
     }, heroRef);
-    
+
     // Refresh ScrollTrigger slightly after render to account for lazy loading images
     const timer = setTimeout(() => { ScrollTrigger.refresh(); }, 500);
-    
+
     return () => {
       clearTimeout(timer);
       ctx.revert();
@@ -197,7 +197,7 @@ export default function Home() {
       <section style={{ padding: '3rem 0', background: 'var(--surface)' }}>
         <div style={{ position: 'relative', width: '95%', margin: '0 auto' }}>
           {/* Scroll Left Button */}
-          <button 
+          <button
             className="cat-nav-btn left"
             onClick={() => slideCategories('left')}
             style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 44, height: 44, borderRadius: '50%', background: 'var(--bg)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--slate-600)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', cursor: 'pointer', transition: 'all 0.2s' }}
@@ -209,74 +209,74 @@ export default function Home() {
 
           <div style={{ display: 'flex', justifyContent: 'center', width: '100%', padding: '0 2rem' }}>
             <div ref={categoriesRef} className="hide-scrollbar" style={{ maxWidth: '100%', display: 'flex', overflowX: 'auto', gap: '1.25rem', paddingTop: '2.5rem', paddingBottom: '1.5rem', WebkitOverflowScrolling: 'touch', paddingLeft: 'clamp(1.25rem, 5vw, 2.5rem)', paddingRight: 'clamp(1.25rem, 5vw, 2.5rem)', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-            {categories.map(cat => (
-              <button
-                key={cat.id}
-                onClick={() => navigate(`/marketplace?category=${cat.name}`)}
-                style={{
-                  flexShrink: 0,
-                  display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  padding: '0 1.5rem 1rem',
-                  background: 'var(--bg)',
-                  border: '1.5px solid var(--border)',
-                  borderRadius: 20,
-                  cursor: 'pointer',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  minWidth: 120,
-                  position: 'relative',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.background = 'var(--green-50)';
-                  e.currentTarget.style.borderColor = 'var(--green-300)';
-                  e.currentTarget.style.transform = 'translateY(-6px)';
-                  e.currentTarget.style.boxShadow = '0 12px 24px -8px rgba(34, 197, 94, 0.25)';
-                  const img = e.currentTarget.querySelector('.cat-img');
-                  if (img) img.style.transform = 'scale(1.1) rotate(3deg)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.background = 'var(--bg)';
-                  e.currentTarget.style.borderColor = 'var(--border)';
-                  e.currentTarget.style.transform = 'none';
-                  e.currentTarget.style.boxShadow = 'none';
-                  const img = e.currentTarget.querySelector('.cat-img');
-                  if (img) img.style.transform = 'scale(1) rotate(0deg)';
-                }}
-              >
-                {cat.image ? (
-                  <img src={cat.image} alt={cat.name} className="cat-img" style={{
-                    width: 84, height: 84,
-                    objectFit: 'cover',
-                    borderRadius: '50%',
-                    boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
-                    marginTop: '-2.5rem',
-                    marginBottom: '0.75rem',
-                    border: '5px solid var(--bg)',
-                    transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                    backgroundColor: 'var(--earth-50)'
-                  }} />
-                ) : (
-                  <div className="cat-img" style={{
-                    width: 84, height: 84,
-                    borderRadius: '50%',
-                    background: 'var(--earth-50)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
-                    marginTop: '-2.5rem',
-                    marginBottom: '0.75rem',
-                    border: '5px solid var(--bg)',
-                    transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                  }}>
-                    <span style={{ fontSize: '2.5rem' }}>{cat.icon}</span>
-                  </div>
-                )}
-                <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--slate-800)', whiteSpace: 'nowrap' }}>{cat.name}</span>
-              </button>
-            ))}
+              {categories.map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => navigate(`/marketplace?category=${cat.name}`)}
+                  style={{
+                    flexShrink: 0,
+                    display: 'flex', flexDirection: 'column', alignItems: 'center',
+                    padding: '0 1.5rem 1rem',
+                    background: 'var(--bg)',
+                    border: '1.5px solid var(--border)',
+                    borderRadius: 20,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    minWidth: 120,
+                    position: 'relative',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'var(--green-50)';
+                    e.currentTarget.style.borderColor = 'var(--green-300)';
+                    e.currentTarget.style.transform = 'translateY(-6px)';
+                    e.currentTarget.style.boxShadow = '0 12px 24px -8px rgba(34, 197, 94, 0.25)';
+                    const img = e.currentTarget.querySelector('.cat-img');
+                    if (img) img.style.transform = 'scale(1.1) rotate(3deg)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'var(--bg)';
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                    e.currentTarget.style.transform = 'none';
+                    e.currentTarget.style.boxShadow = 'none';
+                    const img = e.currentTarget.querySelector('.cat-img');
+                    if (img) img.style.transform = 'scale(1) rotate(0deg)';
+                  }}
+                >
+                  {cat.image ? (
+                    <img src={cat.image} alt={cat.name} className="cat-img" style={{
+                      width: 84, height: 84,
+                      objectFit: 'cover',
+                      borderRadius: '50%',
+                      boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
+                      marginTop: '-2.5rem',
+                      marginBottom: '0.75rem',
+                      border: '5px solid var(--bg)',
+                      transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                      backgroundColor: 'var(--earth-50)'
+                    }} />
+                  ) : (
+                    <div className="cat-img" style={{
+                      width: 84, height: 84,
+                      borderRadius: '50%',
+                      background: 'var(--earth-50)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
+                      marginTop: '-2.5rem',
+                      marginBottom: '0.75rem',
+                      border: '5px solid var(--bg)',
+                      transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    }}>
+                      <span style={{ fontSize: '2.5rem' }}>{cat.icon}</span>
+                    </div>
+                  )}
+                  <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--slate-800)', whiteSpace: 'nowrap' }}>{cat.name}</span>
+                </button>
+              ))}
+            </div>
           </div>
-          </div>
-          
+
           {/* Scroll Right Button */}
-          <button 
+          <button
             className="cat-nav-btn right"
             onClick={() => slideCategories('right')}
             style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 44, height: 44, borderRadius: '50%', background: 'var(--bg)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--slate-600)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', cursor: 'pointer', transition: 'all 0.2s' }}

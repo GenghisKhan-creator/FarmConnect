@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Sprout, MapPin, Phone, Mail, Facebook, Twitter, Instagram } from 'lucide-react';
+import logoImg from '../assets/logo.jpg';
 
 export default function Footer() {
   return (
@@ -18,9 +19,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem' }}>
-              <div style={{ width: 36, height: 36, background: 'linear-gradient(135deg, var(--green-600), var(--green-400))', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Sprout size={20} color="#fff" />
-              </div>
+              <img src={logoImg} alt="FarmConnect Logo" style={{ width: 48, height: 48, objectFit: 'contain', borderRadius: 8 }} />
               <span style={{ fontFamily: 'Plus Jakarta Sans', fontWeight: 800, fontSize: '1.125rem', color: '#fff' }}>
                 Farm<span style={{ color: 'var(--green-400)' }}>Connect</span>
               </span>

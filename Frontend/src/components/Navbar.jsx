@@ -6,6 +6,7 @@ import {
   User, LogOut, Settings, LayoutDashboard, ShoppingBag,
   MessageCircle, Star,
 } from 'lucide-react';
+import logoImg from '../assets/logo.jpg';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -56,14 +57,8 @@ export default function Navbar() {
       <div className="container" style={{ display: 'flex', alignItems: 'center', gap: '1rem', height: '64px' }}>
         {/* Logo */}
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-          <div style={{
-            width: 36, height: 36,
-            background: 'linear-gradient(135deg, var(--green-600), var(--green-400))',
-            borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <Sprout size={20} color="#fff" />
-          </div>
-          <span style={{ fontFamily: 'Plus Jakarta Sans', fontWeight: 800, fontSize: '1.125rem', color: 'var(--green-800)' }}>
+          <img src={logoImg} alt="FarmConnect Logo" style={{ width: 48, height: 48, objectFit: 'contain', borderRadius: 8 }} />
+          <span className="hide-mobile" style={{ fontFamily: 'Plus Jakarta Sans', fontWeight: 800, fontSize: '1.125rem', color: 'var(--green-800)' }}>
             Farm<span style={{ color: 'var(--green-500)' }}>Connect</span>
           </span>
         </Link>
