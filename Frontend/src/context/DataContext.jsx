@@ -3,17 +3,28 @@ import { createContext, useContext, useState, useCallback } from 'react';
 
 const DataContext = createContext(null);
 
+import maizeImg from '../assets/maize.jpg';
+import milletsImg from '../assets/millets.jpg';
+import riceImg from '../assets/rice.jpg';
+import groundnutsImg from '../assets/goundnuts.jpg';
+import soybeansImg from '../assets/soybeans.jpg';
+import sheaNutsImg from '../assets/sheabutter.jpg';
+import vegImg from '../assets/vegetables.jpg';
+import livestockImg from '../assets/livestock.jpg';
+import fruitsImg from '../assets/fruit.jpg';
+import yamsImg from '../assets/yam.jpg';
+
 const CATEGORIES = [
-  { id: 1, name: 'Maize', icon: '🌽' },
-  { id: 2, name: 'Millet', icon: '🌾' },
-  { id: 3, name: 'Rice', icon: '🍚' },
-  { id: 4, name: 'Groundnuts', icon: '🥜' },
-  { id: 5, name: 'Soybeans', icon: '🫘' },
-  { id: 6, name: 'Shea Nuts', icon: '🌰' },
-  { id: 7, name: 'Vegetables', icon: '🥬' },
-  { id: 8, name: 'Livestock', icon: '🐄' },
-  { id: 9, name: 'Fruits', icon: '🍋' },
-  { id: 10, name: 'Yams', icon: '🍠' },
+  { id: 1, name: 'Maize', icon: '🌽', image: maizeImg },
+  { id: 2, name: 'Millet', icon: '🌾', image: milletsImg },
+  { id: 3, name: 'Rice', icon: '🍚', image: riceImg },
+  { id: 4, name: 'Groundnuts', icon: '🥜', image: groundnutsImg },
+  { id: 5, name: 'Soybeans', icon: '🫘', image: soybeansImg },
+  { id: 6, name: 'Shea Nuts', icon: '🌰', image: sheaNutsImg },
+  { id: 7, name: 'Vegetables', icon: '🥬', image: vegImg },
+  { id: 8, name: 'Livestock', icon: '🐄', image: livestockImg },
+  { id: 9, name: 'Fruits', icon: '🍋', image: fruitsImg },
+  { id: 10, name: 'Yams', icon: '🍠', image: yamsImg },
 ];
 
 const INITIAL_PRODUCTS = [

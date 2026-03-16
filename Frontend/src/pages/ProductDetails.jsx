@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext';
 
 export default function ProductDetails() {
   const { id } = useParams();
-  const { products, reviews, addOrder } = useData();
+  const { products, reviews, addOrder, categories } = useData();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -20,6 +20,8 @@ export default function ProductDetails() {
   const [liked, setLiked] = useState(false);
 
   const product = products.find(p => p.id === Number(id));
+  const categoryObj = categories?.find(c => c.name === product?.category);
+  const imageSrc = categoryObj ? categoryObj.image : null;
 
   if (!product) {
     return (
@@ -78,9 +80,13 @@ export default function ProductDetails() {
             {/* Product image */}
             <div className="card" style={{ overflow: 'hidden' }}>
               <div style={{ height: 300, position: 'relative' }}>
-                <div className="img-placeholder" style={{ fontSize: '7rem' }}>
-                  {getCategoryIcon(product.category)}
-                </div>
+                {imageSrc ? (
+                  <img src={imageSrc} alt={product.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <div className="img-placeholder" style={{ fontSize: '7rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', background: 'var(--earth-50)' }}>
+                    {getCategoryIcon(product.category)}
+                  </div>
+                )}
                 {product.premium && (
                   <div className="premium-ribbon">
                     <Award size={12} /> Premium

@@ -6,9 +6,12 @@ import {
   Sprout, ArrowRight, Search, Shield, Zap, TrendingUp,
   Users, Package, CheckCircle, Star, MapPin, ChevronRight,
   Wheat, Truck, PhoneCall, Award,
+  ChevronLeft, Facebook, Instagram, Youtube, Play
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import ProductCard from '../components/ProductCard';
+import heroBg from '../assets/hero_bg.png';
+import farmerThumb from '../assets/farmer_thumb.png';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,52 +20,71 @@ export default function Home() {
   const navigate = useNavigate();
   const heroRef = useRef(null);
   const statsRef = useRef(null);
+  const categoriesRef = useRef(null);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const slideCategories = (direction) => {
+    if (categoriesRef.current) {
+      const scrollAmount = window.innerWidth > 768 ? 400 : 250;
+      categoriesRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
     // Hero animation
     const ctx = gsap.context(() => {
-      gsap.from('.hero-badge', { opacity: 0, y: -20, duration: 0.6, delay: 0.1 });
-      gsap.from('.hero-title', { opacity: 0, y: 30, duration: 0.7, delay: 0.25 });
-      gsap.from('.hero-sub', { opacity: 0, y: 20, duration: 0.6, delay: 0.45 });
-      gsap.from('.hero-btns', { opacity: 0, y: 20, duration: 0.6, delay: 0.6 });
-      gsap.from('.hero-search', { opacity: 0, y: 20, duration: 0.6, delay: 0.75 });
-      gsap.from('.hero-stat', { opacity: 0, y: 20, duration: 0.5, stagger: 0.1, delay: 0.9 });
-
-      // Floating leaves
-      gsap.to('.leaf-1', { y: -12, rotation: 8, duration: 3, repeat: -1, yoyo: true, ease: 'power1.inOut' });
-      gsap.to('.leaf-2', { y: 10, rotation: -6, duration: 4, repeat: -1, yoyo: true, ease: 'power1.inOut' });
+      // Hero Elements
+      gsap.from('.hero-giant-word', { opacity: 0, scale: 0.8, y: 50, duration: 1, ease: 'power3.out' });
+      gsap.from('.hero-sub', { opacity: 0, y: 20, duration: 0.8, delay: 0.2 });
+      gsap.from('.hero-btns', { opacity: 0, y: 20, duration: 0.8, delay: 0.4 });
+      gsap.from('.hero-search', { opacity: 0, scale: 0.9, duration: 0.8, delay: 0.6 });
+      gsap.from('.hero-badge', { opacity: 0, rotation: 45, duration: 0.6, delay: 0.8, stagger: 0.2 });
 
       // Stats counter scroll
-      gsap.from('.stat-value-anim', {
-        textContent: 0,
-        duration: 1.5,
-        ease: 'power2.out',
-        scrollTrigger: { trigger: statsRef.current, start: 'top 80%' },
-        snap: { textContent: 1 },
-        stagger: 0.15,
-      });
+      if (statsRef.current) {
+        gsap.from('.stat-value-anim', {
+          textContent: 0,
+          duration: 1.5,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: statsRef.current, start: 'top 85%' },
+          snap: { textContent: 1 },
+          stagger: 0.15,
+        });
+      }
 
       // Feature cards
-      gsap.from('.feature-card', {
-        opacity: 0,
-        y: 40,
-        duration: 0.6,
-        stagger: 0.12,
-        scrollTrigger: { trigger: '.features-section', start: 'top 75%' },
-      });
+      gsap.fromTo('.feature-card', 
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          stagger: 0.12,
+          scrollTrigger: { trigger: '.features-section', start: 'top 85%' },
+        }
+      );
 
       // Product cards
-      gsap.from('.product-anim', {
-        opacity: 0,
-        y: 30,
-        duration: 0.5,
-        stagger: 0.08,
-        scrollTrigger: { trigger: '.products-section', start: 'top 80%' },
-      });
+      gsap.fromTo('.product-anim', 
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          stagger: 0.08,
+          scrollTrigger: { trigger: '.grid-products', start: 'top 85%' },
+        }
+      );
 
     }, heroRef);
-    return () => ctx.revert();
+    
+    // Refresh ScrollTrigger slightly after render to account for lazy loading images
+    const timer = setTimeout(() => { ScrollTrigger.refresh(); }, 500);
+    
+    return () => {
+      clearTimeout(timer);
+      ctx.revert();
+    };
   }, []);
 
   const featuredProducts = products.filter(p => p.premium && p.status === 'available').slice(0, 4);
@@ -77,118 +99,95 @@ export default function Home() {
     <div ref={heroRef}>
       {/* ── HERO ── */}
       <section style={{
-        background: 'linear-gradient(135deg, #0a1f0e 0%, #14532d 50%, #166534 100%)',
-        minHeight: '92vh',
+        background: `url(${heroBg}) center/cover no-repeat`,
+        minHeight: '100vh',
         display: 'flex',
         alignItems: 'center',
+        justifyContent: 'center',
         position: 'relative',
         overflow: 'hidden',
-        padding: '4rem 0',
       }}>
-        {/* Decorative elements */}
-        <div className="leaf-1" style={{ position: 'absolute', top: '15%', right: '8%', fontSize: '5rem', opacity: 0.12, userSelect: 'none' }}>🌿</div>
-        <div className="leaf-2" style={{ position: 'absolute', bottom: '20%', left: '5%', fontSize: '6rem', opacity: 0.08, userSelect: 'none' }}>🌾</div>
-        <div style={{ position: 'absolute', top: '30%', right: '20%', width: 300, height: 300, background: 'radial-gradient(circle, rgba(34,197,94,0.15) 0%, transparent 70%)', borderRadius: '50%' }} />
-        <div style={{ position: 'absolute', bottom: '10%', left: '30%', width: 200, height: 200, background: 'radial-gradient(circle, rgba(251,191,36,0.1) 0%, transparent 70%)', borderRadius: '50%' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%)' }}></div>
 
-        <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center' }}>
-            <div className="hero-badge" style={{
-              display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-              background: 'rgba(34,197,94,0.15)',
-              border: '1px solid rgba(34,197,94,0.3)',
-              borderRadius: 999,
-              padding: '0.375rem 1rem',
-              marginBottom: '1.5rem',
-              color: '#86efac',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-            }}>
-              <Sprout size={16} /> Ghana's #1 Farm Marketplace · Upper West Region
-            </div>
+        {/* Giant Cut-Out Text Approximation */}
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -60%)', zIndex: 0, pointerEvents: 'none' }}>
+          {/* <h1 className="hero-giant-word" style={{
+            fontSize: 'clamp(8rem, 25vw, 25rem)',
+            fontWeight: 900,
+            color: '#fff',
+            lineHeight: 1,
+            margin: 0,
+            letterSpacing: '-0.02em',
+            textShadow: '0 20px 50px rgba(0,0,0,0.6)',
+            fontFamily: 'Montserrat, "Plus Jakarta Sans", sans-serif',
+            opacity: 0.95
+          }}>
+            FARM
+          </h1> */}
+        </div>
 
-            <h1 className="hero-title" style={{
-              fontSize: 'clamp(2.25rem, 7vw, 4rem)',
-              fontWeight: 900,
-              color: '#fff',
-              lineHeight: 1.1,
-              marginBottom: '1.25rem',
-              letterSpacing: '-0.03em',
-            }}>
-              Farm Fresh,<br />
-              <span style={{ color: '#4ade80' }}>Direct to You</span>
-            </h1>
-
+        <div className="container" style={{ position: 'relative', zIndex: 1, textAlign: 'center', marginTop: '10vh' }}>
+          <div style={{ maxWidth: 680, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <p className="hero-sub" style={{
-              fontSize: 'clamp(1rem, 2.5vw, 1.2rem)',
-              color: 'rgba(255,255,255,0.75)',
-              lineHeight: 1.7,
+              fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
+              color: 'rgba(255,255,255,0.95)',
+              lineHeight: 1.6,
               marginBottom: '2rem',
-              maxWidth: '55ch',
-              margin: '0 auto 2rem',
+              maxWidth: '45ch',
+              fontWeight: 500,
+              textShadow: '0 2px 6px rgba(0,0,0,0.6)',
             }}>
-              Connect directly with smallholder farmers across the Upper West Region.
-              No middlemen. Better prices. Fresher produce.
+              As an agricultural platform, we're on a mission to make it simple for everyone to access fresh produce directly from farmers!
             </p>
 
-            <div className="hero-btns" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '2rem' }}>
-              <Link to="/marketplace" className="btn btn-primary btn-lg">
-                Browse Products <ArrowRight size={18} />
-              </Link>
-              <Link to="/register?role=farmer" className="btn btn-lg" style={{
-                background: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(8px)',
-                color: '#fff',
-                border: '1.5px solid rgba(255,255,255,0.2)',
-              }}>
-                <Wheat size={18} /> Sell Your Harvest
-              </Link>
-            </div>
+            <Link to="/marketplace" className="hero-btns" style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: '#84cc16',
+              color: '#000',
+              fontWeight: 700,
+              padding: '1.1rem 2.5rem',
+              borderRadius: '999px',
+              textDecoration: 'none',
+              fontSize: '0.9rem',
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+              boxShadow: '0 10px 25px rgba(132, 204, 22, 0.3)',
+              transition: 'transform 0.3s, box-shadow 0.3s'
+            }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 15px 35px rgba(132, 204, 22, 0.4)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 25px rgba(132, 204, 22, 0.3)'; }}
+            >
+              BROWSE MARKETPLACE
+            </Link>
+          </div>
+        </div>
 
-            {/* Search bar */}
-            <form className="hero-search" onSubmit={handleSearch} style={{
-              display: 'flex',
-              background: 'rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(16px)',
-              border: '1.5px solid rgba(255,255,255,0.2)',
-              borderRadius: 16,
-              overflow: 'hidden',
-              maxWidth: 560,
-              margin: '0 auto',
-            }}>
-              <div style={{ position: 'relative', flex: 1 }}>
-                <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.5)' }} />
-                <input
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  type="search"
-                  placeholder="Search maize, shea nuts, livestock..."
-                  style={{
-                    width: '100%', height: 56, background: 'transparent',
-                    border: 'none', outline: 'none',
-                    paddingLeft: '3rem', paddingRight: '1rem',
-                    color: '#fff', fontSize: '0.95rem',
-                  }}
-                />
+        {/* Side Nav Arrows */}
+        <button className="hero-badge" style={{ position: 'absolute', left: '4vw', top: '50%', transform: 'translateY(-50%)', width: 44, height: 44, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.3)', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', cursor: 'pointer', zIndex: 10, transition: 'all 0.3s' }} onMouseEnter={e => { e.currentTarget.style.borderColor = '#84cc16'; e.currentTarget.style.color = '#84cc16'; }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; e.currentTarget.style.color = '#fff'; }}>
+          <ChevronLeft size={20} />
+        </button>
+        <button className="hero-badge" style={{ position: 'absolute', right: '4vw', top: '50%', transform: 'translateY(-50%)', width: 44, height: 44, borderRadius: '50%', border: '1px solid #84cc16', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#84cc16', cursor: 'pointer', zIndex: 10, transition: 'all 0.3s', borderColor: '#84cc16' }}>
+          <ChevronRight size={20} />
+        </button>
+
+        {/* Bottom Socials */}
+        <div style={{ position: 'absolute', bottom: '2.5rem', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '1.5rem', zIndex: 10, alignItems: 'center' }}>
+          <Facebook size={18} color="#fff" style={{ cursor: 'pointer', opacity: 0.7, transition: 'opacity 0.2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.7} />
+          <Instagram size={18} color="#fff" style={{ cursor: 'pointer', opacity: 0.7, transition: 'opacity 0.2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.7} />
+          <Youtube size={18} color="#fff" style={{ cursor: 'pointer', opacity: 0.7, transition: 'opacity 0.2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.7} />
+        </div>
+
+        {/* Bottom Right Video Card */}
+        <div className="hero-search" style={{ position: 'absolute', bottom: '2.5rem', right: '4vw', width: 220, height: 120, borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', zIndex: 10, cursor: 'pointer', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', transition: 'transform 0.3s' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+          <img src={farmerThumb} alt="Video thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%)' }}></div>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: 44, height: 44, borderRadius: '50%', border: '1px solid rgba(132,204,22,0.6)', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#84cc16' }}>
+              <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#84cc16', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000' }}>
+                <Play size={14} style={{ marginLeft: 3 }} fill="#000" color="#000" />
               </div>
-              <button type="submit" className="btn btn-primary" style={{ margin: 6, borderRadius: 10 }}>
-                Search
-              </button>
-            </form>
-
-            {/* Mini stats */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginTop: '2.5rem', flexWrap: 'wrap' }}>
-              {[
-                { num: '500+', label: 'Farmers' },
-                { num: '1,200+', label: 'Listings' },
-                { num: '8', label: 'Districts' },
-                { num: '4.8★', label: 'Avg Rating' },
-              ].map(s => (
-                <div key={s.label} className="hero-stat" style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '1.375rem', fontWeight: 800, color: '#4ade80' }}>{s.num}</div>
-                  <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)' }}>{s.label}</div>
-                </div>
-              ))}
             </div>
           </div>
         </div>
@@ -196,31 +195,96 @@ export default function Home() {
 
       {/* ── CATEGORIES ── */}
       <section style={{ padding: '3rem 0', background: 'var(--surface)' }}>
-        <div className="container">
-          <div style={{ display: 'flex', overflowX: 'auto', gap: '0.75rem', paddingBottom: '0.5rem', WebkitOverflowScrolling: 'touch' }}>
+        <div style={{ position: 'relative', width: '95%', margin: '0 auto' }}>
+          {/* Scroll Left Button */}
+          <button 
+            className="cat-nav-btn left"
+            onClick={() => slideCategories('left')}
+            style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 44, height: 44, borderRadius: '50%', background: 'var(--bg)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--slate-600)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', cursor: 'pointer', transition: 'all 0.2s' }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--green-600)'; e.currentTarget.style.borderColor = 'var(--green-300)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--slate-600)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+          >
+            <ChevronLeft size={20} />
+          </button>
+
+          <div style={{ display: 'flex', justifyContent: 'center', width: '100%', padding: '0 2rem' }}>
+            <div ref={categoriesRef} className="hide-scrollbar" style={{ maxWidth: '100%', display: 'flex', overflowX: 'auto', gap: '1.25rem', paddingTop: '2.5rem', paddingBottom: '1.5rem', WebkitOverflowScrolling: 'touch', paddingLeft: 'clamp(1.25rem, 5vw, 2.5rem)', paddingRight: 'clamp(1.25rem, 5vw, 2.5rem)', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {categories.map(cat => (
               <button
                 key={cat.id}
                 onClick={() => navigate(`/marketplace?category=${cat.name}`)}
                 style={{
                   flexShrink: 0,
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.375rem',
-                  padding: '0.875rem 1.25rem',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  padding: '0 1.5rem 1rem',
                   background: 'var(--bg)',
                   border: '1.5px solid var(--border)',
-                  borderRadius: 14,
+                  borderRadius: 20,
                   cursor: 'pointer',
-                  transition: 'var(--transition)',
-                  minWidth: 80,
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  minWidth: 120,
+                  position: 'relative',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'var(--green-50)'; e.currentTarget.style.borderColor = 'var(--green-300)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = 'var(--green-50)';
+                  e.currentTarget.style.borderColor = 'var(--green-300)';
+                  e.currentTarget.style.transform = 'translateY(-6px)';
+                  e.currentTarget.style.boxShadow = '0 12px 24px -8px rgba(34, 197, 94, 0.25)';
+                  const img = e.currentTarget.querySelector('.cat-img');
+                  if (img) img.style.transform = 'scale(1.1) rotate(3deg)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = 'var(--bg)';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.boxShadow = 'none';
+                  const img = e.currentTarget.querySelector('.cat-img');
+                  if (img) img.style.transform = 'scale(1) rotate(0deg)';
+                }}
               >
-                <span style={{ fontSize: '1.75rem' }}>{cat.icon}</span>
-                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--slate-700)', whiteSpace: 'nowrap' }}>{cat.name}</span>
+                {cat.image ? (
+                  <img src={cat.image} alt={cat.name} className="cat-img" style={{
+                    width: 84, height: 84,
+                    objectFit: 'cover',
+                    borderRadius: '50%',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
+                    marginTop: '-2.5rem',
+                    marginBottom: '0.75rem',
+                    border: '5px solid var(--bg)',
+                    transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    backgroundColor: 'var(--earth-50)'
+                  }} />
+                ) : (
+                  <div className="cat-img" style={{
+                    width: 84, height: 84,
+                    borderRadius: '50%',
+                    background: 'var(--earth-50)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
+                    marginTop: '-2.5rem',
+                    marginBottom: '0.75rem',
+                    border: '5px solid var(--bg)',
+                    transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  }}>
+                    <span style={{ fontSize: '2.5rem' }}>{cat.icon}</span>
+                  </div>
+                )}
+                <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--slate-800)', whiteSpace: 'nowrap' }}>{cat.name}</span>
               </button>
             ))}
           </div>
+          </div>
+          
+          {/* Scroll Right Button */}
+          <button 
+            className="cat-nav-btn right"
+            onClick={() => slideCategories('right')}
+            style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 44, height: 44, borderRadius: '50%', background: 'var(--bg)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--slate-600)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', cursor: 'pointer', transition: 'all 0.2s' }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--green-600)'; e.currentTarget.style.borderColor = 'var(--green-300)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--slate-600)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+          >
+            <ChevronRight size={20} />
+          </button>
         </div>
       </section>
 
@@ -264,8 +328,9 @@ export default function Home() {
             ].map(s => (
               <div key={s.label} style={{ color: '#fff' }}>
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem', opacity: 0.7 }}>{s.icon}</div>
-                <div className="stat-value-anim" style={{ fontSize: '2.5rem', fontWeight: 900, fontFamily: 'Plus Jakarta Sans' }}>
-                  {s.val}{s.suffix}
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: 2, fontSize: '2.5rem', fontWeight: 900, fontFamily: 'Plus Jakarta Sans' }}>
+                  <span className="stat-value-anim">{s.val}</span>
+                  <span>{s.suffix}</span>
                 </div>
                 <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.75)', marginTop: '0.25rem' }}>{s.label}</div>
               </div>
@@ -395,6 +460,17 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <style>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        @media (max-width: 768px) {
+          .cat-nav-btn {
+            display: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

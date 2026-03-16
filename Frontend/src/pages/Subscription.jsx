@@ -2,6 +2,12 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Check, Zap, Award, BarChart3, Star, Infinity, Eye } from 'lucide-react';
 
+import mtnImg from '../assets/mtn.jpg';
+import telecashImg from '../assets/telecash.jpg';
+import airteltigoImg from '../assets/airteltigo.jpg';
+import paystackImg from '../assets/paystack.jpg';
+import flutterwaveImg from '../assets/flutterwave.jpg';
+
 const PLANS = [
   {
     name: 'Free',
@@ -72,11 +78,11 @@ const PLANS = [
 ];
 
 const PAYMENT_METHODS = [
-  { name: 'MTN MoMo', color: '#ffcc00', emoji: '📱' },
-  { name: 'Vodafone Cash', color: '#e60000', emoji: '💳' },
-  { name: 'AirtelTigo', color: '#ff6600', emoji: '💰' },
-  { name: 'Paystack', color: '#00C3F7', emoji: '🏦' },
-  { name: 'Flutterwave', color: '#F5A623', emoji: '⚡' },
+  { name: 'MTN MoMo', color: '#ffcc00', image: mtnImg },
+  { name: 'TeleCash', color: '#e60000', image: telecashImg },
+  { name: 'AirtelTigo', color: '#ff6600', image: airteltigoImg },
+  { name: 'Paystack', color: '#00C3F7', image: paystackImg },
+  { name: 'Flutterwave', color: '#F5A623', image: flutterwaveImg },
 ];
 
 export default function Subscription() {
@@ -165,13 +171,14 @@ export default function Subscription() {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center' }}>
             {PAYMENT_METHODS.map(pm => (
               <div key={pm.name} style={{
-                display: 'flex', alignItems: 'center', gap: '0.5rem',
-                padding: '0.75rem 1.25rem',
+                display: 'flex', alignItems: 'center', gap: '1rem',
+                padding: '1rem 1.5rem',
                 background: 'var(--bg)', border: '1.5px solid var(--border)',
                 borderRadius: 'var(--radius-lg)',
-                fontWeight: 600, fontSize: '0.9rem',
+                fontWeight: 700, fontSize: '1rem',
               }}>
-                <span style={{ fontSize: '1.25rem' }}>{pm.emoji}</span> {pm.name}
+                <img src={pm.image} alt={pm.name} style={{ width: 64, height: 40, objectFit: 'contain', borderRadius: 4 }} />
+                {pm.name}
               </div>
             ))}
           </div>

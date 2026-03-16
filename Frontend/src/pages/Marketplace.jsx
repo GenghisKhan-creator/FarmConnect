@@ -235,12 +235,20 @@ function FilterPill({ label, onRemove }) {
 
 function ProductListCard({ product }) {
   const navigate = useNavigate();
+  const { categories } = useData();
+  const categoryObj = categories?.find(c => c.name === product.category);
+  const imageSrc = categoryObj ? categoryObj.image : null;
+
   return (
     <div className="card" style={{ display: 'flex', gap: '1rem', cursor: 'pointer' }}
       onClick={() => navigate(`/products/${product.id}`)}
     >
-      <div style={{ width: 100, height: 100, flexShrink: 0, background: 'var(--earth-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', borderRadius: 'var(--radius-md)', margin: '0.75rem 0 0.75rem 0.75rem' }}>
-        {['🌽', '🌾', '🍚', '🥜', '🫘', '🌰', '🥬', '🐄', '🍋', '🍠'][['Maize','Millet','Rice','Groundnuts','Soybeans','Shea Nuts','Vegetables','Livestock','Fruits','Yams'].indexOf(product.category)] || '🌿'}
+      <div style={{ width: 100, height: 100, flexShrink: 0, background: 'var(--earth-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', borderRadius: 'var(--radius-md)', margin: '0.75rem 0 0.75rem 0.75rem', overflow: 'hidden' }}>
+        {imageSrc ? (
+          <img src={imageSrc} alt={product.category} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        ) : (
+          <span>{['🌽', '🌾', '🍚', '🥜', '🫘', '🌰', '🥬', '🐄', '🍋', '🍠'][['Maize','Millet','Rice','Groundnuts','Soybeans','Shea Nuts','Vegetables','Livestock','Fruits','Yams'].indexOf(product.category)] || '🌿'}</span>
+        )}
       </div>
       <div className="card-body" style={{ flex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>

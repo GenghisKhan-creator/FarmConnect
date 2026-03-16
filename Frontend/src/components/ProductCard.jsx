@@ -1,8 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import { ShoppingBag, ShieldCheck, Star } from 'lucide-react';
+import { useData } from '../context/DataContext';
 
 export default function ProductCard({ product }) {
   const navigate = useNavigate();
+  const { categories } = useData();
+  const categoryObj = categories?.find(c => c.name === product.category);
+  const imageSrc = categoryObj ? categoryObj.image : null;
 
   const getCategoryEmoji = (cat) => {
     const map = {
@@ -77,17 +81,30 @@ export default function ProductCard({ product }) {
         position: 'relative',
         zIndex: 1,
       }}>
-        <div style={{
-          fontSize: '5.5rem',
-          lineHeight: 1,
-          filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.5))',
-          userSelect: 'none',
-          transition: 'transform 0.3s ease',
-        }}
-          className="product-card-emoji"
-        >
-          {getCategoryEmoji(product.category)}
-        </div>
+        {imageSrc ? (
+          <img 
+            src={imageSrc} 
+            alt={product.category} 
+            className="product-card-img"
+            style={{
+              width: 100, height: 100,
+              objectFit: 'cover',
+              borderRadius: '50%',
+              boxShadow: '0 8px 16px rgba(0,0,0,0.5)',
+            }} 
+          />
+        ) : (
+          <div style={{
+            fontSize: '5.5rem',
+            lineHeight: 1,
+            filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.5))',
+            userSelect: 'none',
+          }}
+            className="product-card-emoji"
+          >
+            {getCategoryEmoji(product.category)}
+          </div>
+        )}
       </div>
 
       {/* Content */}
@@ -237,10 +254,10 @@ export default function ProductCard({ product }) {
       </div>
 
       <style>{`
-        .product-card-emoji {
+        .product-card-emoji, .product-card-img {
           transition: transform 0.3s ease;
         }
-        div:hover > div > .product-card-emoji {
+        div:hover > div > .product-card-emoji, div:hover > div > .product-card-img  {
           transform: scale(1.08) translateY(-3px);
         }
       `}</style>
