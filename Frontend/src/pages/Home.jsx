@@ -99,16 +99,14 @@ export default function Home() {
     <div ref={heroRef}>
       {/* ── NEW HERO ── */}
       <section style={{ padding: '0.75rem', background: 'var(--surface)' }}>
-        <div style={{
+        <div className="hero-green-wrap" style={{
           position: 'relative',
-          borderRadius: '32px',
           overflow: 'hidden',
           background: 'linear-gradient(180deg, #093c1d 0%, #175e30 50%, #2f8c47 100%)',
           minHeight: '85vh',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          paddingTop: '6rem',
         }}>
           {/* Background Image of Field at the bottom */}
           <div style={{
@@ -145,7 +143,7 @@ export default function Home() {
             </h2>
             <h1 className="hero-giant-word" style={{
               color: '#7ef03b',
-              fontSize: 'clamp(3.5rem, 13vw, 12rem)',
+              fontSize: 'clamp(2.5rem, 10vw, 10rem)',
               fontWeight: 900,
               margin: 0,
               lineHeight: 0.85,
@@ -160,26 +158,17 @@ export default function Home() {
 
         {/* The Overlapping Bottom Cards */}
         <div className="container hero-btns" style={{ position: 'relative', zIndex: 2, marginTop: '-5rem', paddingBottom: '3rem' }}>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-            gap: '2.5rem', 
-            alignItems: 'center',
-            background: '#fff',
-            borderRadius: '24px',
-            padding: '2.5rem',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.1)'
-          }}>
+          <div className="hero-cards-grid">
             {/* Left Card */}
-            <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
+            <div className="hero-card-item reverse-mobile">
               <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: '#1f2937', lineHeight: 1.3 }}>Enhancing Soil Health<br/>For Stronger Plants</h3>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: '#1f2937', lineHeight: 1.3 }}>Enhancing Soil Health<br />For Stronger Plants</h3>
                 <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0 0 1rem 0', lineHeight: 1.5 }}>Healthy soil ensures strong plants through sustainable practices.</p>
                 <Link to="/marketplace" style={{ color: '#0d4a22', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   Learn More <ArrowRight size={14} />
                 </Link>
               </div>
-              <div style={{
+              <div className="hero-icon-wrap" style={{
                 width: 90, height: 90, background: 'var(--green-100)', borderRadius: '50% 50% 0px 50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                 color: 'var(--green-700)', border: '6px solid #f8fafc', boxShadow: '0 10px 20px rgba(0,0,0,0.08)'
@@ -189,7 +178,7 @@ export default function Home() {
             </div>
 
             {/* Middle Text */}
-            <div style={{ textAlign: 'center', padding: '0 1rem' }}>
+            <div className="hero-middle-text">
               <h3 style={{ fontSize: '1.4rem', fontWeight: 600, color: '#1f2937', margin: 0, lineHeight: 1.4 }}>
                 Transforming <span style={{ fontStyle: 'italic', fontWeight: 400 }}>Agriculture</span><br />
                 with Smart Solutions For<br />
@@ -198,8 +187,8 @@ export default function Home() {
             </div>
 
             {/* Right Card */}
-            <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
-              <div style={{
+            <div className="hero-card-item">
+              <div className="hero-icon-wrap" style={{
                 width: 90, height: 90, background: '#fef3c7', borderRadius: '50% 50% 50% 0px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                 color: '#d97706', border: '6px solid #f8fafc', boxShadow: '0 10px 20px rgba(0,0,0,0.08)'
@@ -207,7 +196,7 @@ export default function Home() {
                 <Zap size={36} />
               </div>
               <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: '#1f2937', lineHeight: 1.3 }}>Agriculture Integrated<br/>with Technology</h3>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: '#1f2937', lineHeight: 1.3 }}>Agriculture Integrated<br />with Technology</h3>
                 <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0 0 1rem 0', lineHeight: 1.5 }}>Technology-integrated agriculture revolutionizes global farming.</p>
                 <Link to="/marketplace" style={{ color: '#0d4a22', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   Learn More <ArrowRight size={14} />
@@ -490,6 +479,52 @@ export default function Home() {
         .hide-scrollbar::-webkit-scrollbar {
           display: none;
         }
+
+        .hero-cards-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 2.5rem;
+          align-items: center;
+          background: #fff;
+          border-radius: 24px;
+          padding: 2.5rem;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        }
+        .hero-card-item {
+          display: flex;
+          gap: 1.25rem;
+          align-items: center;
+        }
+        .hero-middle-text {
+          text-align: center;
+          padding: 0 1rem;
+          border-left: 1px solid #e5e7eb;
+          border-right: 1px solid #e5e7eb;
+        }
+        .hero-green-wrap {
+          border-radius: 32px;
+          padding-top: 6rem;
+        }
+
+        @media (max-width: 1024px) {
+          .hero-cards-grid {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            padding: 1.5rem;
+          }
+          .hero-middle-text {
+            border-left: none;
+            border-right: none;
+            border-top: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1.5rem 0;
+          }
+          .hero-green-wrap {
+            border-radius: 20px;
+            padding-top: 4rem;
+          }
+        }
+
         @media (max-width: 768px) {
           .cat-nav-btn {
             display: none !important;
@@ -500,6 +535,20 @@ export default function Home() {
           }
           .category-inner {
             padding: 0 !important;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .hero-card-item {
+            flex-direction: column;
+            text-align: left;
+            align-items: flex-start;
+          }
+          .hero-card-item.reverse-mobile {
+            flex-direction: column-reverse;
+          }
+          .hero-icon-wrap {
+            align-self: flex-start;
           }
         }
       `}</style>
