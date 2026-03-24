@@ -2,7 +2,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import {
   ArrowLeft, MapPin, Calendar, Package, Truck, ShieldCheck,
-  Star, MessageCircle, ShoppingCart, Share2, Award, Eye, Heart,
+  Star, MessageCircle, ShoppingCart, Share2, Award, Eye, Heart, Flag
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
@@ -18,6 +18,9 @@ export default function ProductDetails() {
   const [note, setNote] = useState('');
   const [offerSent, setOfferSent] = useState(false);
   const [liked, setLiked] = useState(false);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [reportSubmitted, setReportSubmitted] = useState(false);
 
   const product = products.find(p => p.id === Number(id));
   const categoryObj = categories?.find(c => c.name === product?.category);
@@ -128,6 +131,9 @@ export default function ProductDetails() {
               </div>
               <button onClick={handleMessage} className="btn btn-secondary" style={{ width: '100%' }}>
                 <MessageCircle size={16} /> Message Farmer
+              </button>
+              <button onClick={() => setReportModalOpen(true)} className="btn btn-ghost" style={{ width: '100%', color: 'var(--red-500)', marginTop: '0.5rem' }}>
+                <Flag size={16} /> Report Fraud
               </button>
             </div>
           </div>
@@ -271,6 +277,56 @@ export default function ProductDetails() {
           </div>
         )}
       </div>
+
+      {/* Report Fraud Modal */}
+      {reportModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(4px)' }}>
+          <div className="card card-body" style={{ width: '90%', maxWidth: 450, position: 'relative' }}>
+            {reportSubmitted ? (
+              <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
+                <ShieldCheck size={48} color="var(--green-600)" style={{ margin: '0 auto 1rem' }} />
+                <h3 style={{ marginBottom: '0.5rem' }}>Report Submitted</h3>
+                <p style={{ color: 'var(--slate-500)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Thank you for keeping FarmConnect safe. Our team will review this listing shortly.</p>
+                <button className="btn btn-primary" onClick={() => { setReportModalOpen(false); setReportSubmitted(false); }} style={{ width: '100%' }}>Close</button>
+              </div>
+            ) : (
+              <>
+                <h3 style={{ marginBottom: '1rem', color: 'var(--red-500)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Flag size={20} /> Report Fraudulent Listing</h3>
+                <p style={{ fontSize: '0.875rem', color: 'var(--slate-600)', marginBottom: '1.25rem' }}>
+                  If you suspect this listing or farmer is fraudulent, please let us know. Your report will be kept confidential.
+                </p>
+                <div className="form-group">
+                  <label className="form-label">Reason for reporting</label>
+                  <select 
+                    className="form-input" 
+                    value={reportReason} 
+                    onChange={e => setReportReason(e.target.value)}
+                  >
+                    <option value="">Select a reason...</option>
+                    <option value="fake_listing">Fake Listing / Scammer</option>
+                    <option value="inaccurate_details">Inaccurate Details / Price</option>
+                    <option value="inappropriate_content">Inappropriate Content</option>
+                    <option value="other">Other suspicious activity</option>
+                  </select>
+                </div>
+                <div style={{ display: 'flex', gap: '0.875rem', marginTop: '1.5rem' }}>
+                  <button className="btn btn-secondary" onClick={() => setReportModalOpen(false)} style={{ flex: 1 }}>Cancel</button>
+                  <button 
+                    className="btn btn-primary" 
+                    disabled={!reportReason}
+                    onClick={() => {
+                      if (!user) { navigate('/login'); return; }
+                      setReportSubmitted(true);
+                      setReportReason('');
+                    }} 
+                    style={{ flex: 1, background: 'var(--red-500)', borderColor: 'var(--red-500)', color: '#fff' }}
+                  >Submit Report</button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

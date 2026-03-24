@@ -195,7 +195,7 @@ export default function Home() {
 
       {/* ── CATEGORIES ── */}
       <section style={{ padding: '3rem 0', background: 'var(--surface)' }}>
-        <div style={{ position: 'relative', width: '95%', margin: '0 auto' }}>
+        <div className="category-wrapper" style={{ position: 'relative', width: '95%', margin: '0 auto' }}>
           {/* Scroll Left Button */}
           <button
             className="cat-nav-btn left"
@@ -207,7 +207,7 @@ export default function Home() {
             <ChevronLeft size={20} />
           </button>
 
-          <div style={{ display: 'flex', justifyContent: 'center', width: '100%', padding: '0 2rem' }}>
+          <div className="category-inner" style={{ display: 'flex', justifyContent: 'center', width: '100%', padding: '0 2rem' }}>
             <div ref={categoriesRef} className="hide-scrollbar" style={{ maxWidth: '100%', display: 'flex', overflowX: 'auto', gap: '1.25rem', paddingTop: '2.5rem', paddingBottom: '1.5rem', WebkitOverflowScrolling: 'touch', paddingLeft: 'clamp(1.25rem, 5vw, 2.5rem)', paddingRight: 'clamp(1.25rem, 5vw, 2.5rem)', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               {categories.map(cat => (
                 <button
@@ -468,6 +468,13 @@ export default function Home() {
         @media (max-width: 768px) {
           .cat-nav-btn {
             display: none !important;
+          }
+          .category-wrapper {
+            width: 100% !important;
+            margin: 0 !important;
+          }
+          .category-inner {
+            padding: 0 !important;
           }
         }
       `}</style>

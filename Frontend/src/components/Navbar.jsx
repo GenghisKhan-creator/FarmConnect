@@ -156,13 +156,19 @@ export default function Navbar() {
       {/* Mobile menu */}
       {mobileOpen && (
         <div style={{
+          position: 'absolute',
+          top: '100%',
+          left: 0,
+          right: 0,
           background: 'var(--surface)',
           borderTop: '1px solid var(--border)',
+          borderBottom: '1px solid var(--border)',
           padding: '1rem 1.25rem 1.5rem',
           display: 'flex',
           flexDirection: 'column',
           gap: '0.5rem',
           animation: 'fadeIn 0.2s ease',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
         }}>
           <form onSubmit={handleSearch} style={{ marginBottom: '0.5rem' }}>
             <div style={{ position: 'relative' }}>

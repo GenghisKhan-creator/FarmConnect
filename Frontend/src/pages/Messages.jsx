@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Send, Search, MessageCircle } from 'lucide-react';
+import { Send, Search, MessageCircle, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 
@@ -12,12 +12,18 @@ const CONVERSATIONS = [
 export default function Messages() {
   const { user } = useAuth();
   const { messages, sendMessage } = useData();
-  const [activeConv, setActiveConv] = useState(CONVERSATIONS[0]);
+  const [activeConv, setActiveConv] = useState(() => 
+    typeof window !== 'undefined' && window.innerWidth > 768 ? CONVERSATIONS[0] : null
+  );
   const [input, setInput] = useState('');
   const [searchConv, setSearchConv] = useState('');
   const messagesEndRef = useRef(null);
 
   const convMessages = messages.filter(m => m.conversationId === activeConv?.id);
+
+  const suggestedMessages = user?.role === 'farmer' 
+    ? ["Yes, it's still available.", "What quantity do you need?", "Let's discuss the price.", "I can arrange delivery."]
+    : ["Hi, is this still available?", "Can we negotiate the price?", "Where is the farm located?", "Do you offer delivery?"];
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -33,15 +39,18 @@ export default function Messages() {
     );
   }
 
-  const handleSend = () => {
-    if (!input.trim() || !activeConv) return;
+  const handleSend = (msgText) => {
+    const textToSend = typeof msgText === 'string' ? msgText : input;
+    if (!textToSend.trim() || !activeConv) return;
     sendMessage({
       conversationId: activeConv.id,
       senderId: user.id,
       receiverId: user.role === 'farmer' ? activeConv.buyerId : activeConv.farmerId,
-      message: input.trim(),
+      message: textToSend.trim(),
     });
-    setInput('');
+    if (typeof msgText !== 'string') {
+      setInput('');
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -61,9 +70,9 @@ export default function Messages() {
   };
 
   return (
-    <div style={{ height: 'calc(100vh - 64px)', display: 'flex', background: 'var(--bg)' }}>
+    <div className="messages-container" style={{ height: 'calc(100vh - 64px)', display: 'flex', background: 'var(--bg)' }}>
       {/* Sidebar */}
-      <div style={{
+      <div className="messages-sidebar" style={{
         width: 320, flexShrink: 0, background: 'var(--surface)',
         borderRight: '1px solid var(--border)',
         display: 'flex', flexDirection: 'column',
@@ -127,9 +136,12 @@ export default function Messages() {
 
       {/* Chat area */}
       {activeConv ? (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div className="messages-chat" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {/* Chat header */}
           <div style={{ padding: '1rem 1.5rem', background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+            <button className="chat-back-btn" onClick={() => setActiveConv(null)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '0.5rem', marginLeft: '-0.5rem', color: 'var(--slate-600)' }}>
+              <ArrowLeft size={20} />
+            </button>
             <div className="avatar" style={{ width: 40, height: 40, fontSize: '0.875rem' }}>
               {getOtherInitials(activeConv)}
             </div>
@@ -159,8 +171,33 @@ export default function Messages() {
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Suggested Messages */}
+          <div className="hide-scrollbar" style={{ padding: '0.75rem 1.25rem 0', background: 'var(--surface)', borderTop: '1px solid var(--border)', display: 'flex', gap: '0.5rem', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            {suggestedMessages.map((msg, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleSend(msg)}
+                style={{
+                  whiteSpace: 'nowrap',
+                  padding: '0.375rem 0.875rem',
+                  borderRadius: 999,
+                  background: 'var(--bg)',
+                  border: '1px solid var(--border)',
+                  fontSize: '0.8rem',
+                  color: 'var(--slate-600)',
+                  cursor: 'pointer',
+                  transition: 'var(--transition)'
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'var(--green-50)'; e.currentTarget.style.color = 'var(--green-700)'; e.currentTarget.style.borderColor = 'var(--green-200)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg)'; e.currentTarget.style.color = 'var(--slate-600)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+              >
+                {msg}
+              </button>
+            ))}
+          </div>
+
           {/* Input */}
-          <div style={{ padding: '1rem 1.25rem', background: 'var(--surface)', borderTop: '1px solid var(--border)', display: 'flex', gap: '0.75rem', alignItems: 'flex-end' }}>
+          <div style={{ padding: '0.75rem 1.25rem 1.25rem', background: 'var(--surface)', display: 'flex', gap: '0.75rem', alignItems: 'flex-end' }}>
             <textarea
               value={input}
               onChange={e => setInput(e.target.value)}
@@ -181,12 +218,43 @@ export default function Messages() {
           </div>
         </div>
       ) : (
-        <div className="empty-state" style={{ flex: 1 }}>
+        <div className="empty-state messages-empty" style={{ flex: 1 }}>
           <div className="empty-state-icon"><MessageCircle size={28} /></div>
           <h3>Select a conversation</h3>
           <p style={{ color: 'var(--slate-500)', fontSize: '0.875rem' }}>Choose a conversation from the left panel</p>
         </div>
       )}
+      <style>{`
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .chat-back-btn {
+          display: none !important;
+        }
+        @media (max-width: 768px) {
+          .messages-sidebar {
+            width: 100% !important;
+            display: ${activeConv ? 'none' : 'flex'} !important;
+            border-right: none !important;
+          }
+          .messages-chat {
+            display: ${activeConv ? 'flex' : 'none'} !important;
+            width: 100% !important;
+          }
+          .messages-empty {
+            display: none !important;
+          }
+          .chat-back-btn {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+          }
+        }
+      `}</style>
     </div>
   );
 }
