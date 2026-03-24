@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import {
   LayoutDashboard, Package, ShoppingCart, BarChart3, Bell,
   Plus, Edit3, Trash2, CheckCircle, X, Clock, MessageCircle,
-  Star, TrendingUp, Eye, MapPin, AlertCircle,
+  Star, TrendingUp, Eye, MapPin, AlertCircle, Heart, Truck,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
@@ -41,6 +41,7 @@ export default function Dashboard() {
     : [
       { key: 'overview', label: 'Overview', icon: <LayoutDashboard size={16} /> },
       { key: 'orders', label: 'My Orders', icon: <ShoppingCart size={16} /> },
+      { key: 'saved', label: 'Saved Items', icon: <Heart size={16} /> },
     ];
 
   return (
@@ -87,6 +88,7 @@ export default function Dashboard() {
           />
         )}
         {tab === 'orders' && <Orders user={user} orders={myOrders} updateOrder={updateOrder} />}
+        {tab === 'saved' && user.role === 'buyer' && <SavedItems />}
       </div>
     </div>
   );
@@ -193,11 +195,20 @@ function Overview({ user, myProducts, myOrders }) {
 function Listings({ user, products, categories, addProduct, updateProduct, deleteProduct }) {
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [previewImages, setPreviewImages] = useState([]);
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
+
+  const handleImageChange = (e) => {
+    if (e.target.files) {
+      const filesArr = Array.from(e.target.files);
+      const urls = filesArr.map(f => URL.createObjectURL(f));
+      setPreviewImages(prev => [...prev, ...urls]);
+    }
+  };
 
   const onSubmit = (data) => {
     if (editingProduct) {
-      updateProduct(editingProduct.id, { ...data, price: Number(data.price), quantity: Number(data.quantity) });
+      updateProduct(editingProduct.id, { ...data, price: Number(data.price), quantity: Number(data.quantity), images: previewImages });
     } else {
       addProduct({
         ...data,
@@ -210,11 +221,13 @@ function Listings({ user, products, categories, addProduct, updateProduct, delet
         farmerRating: user.rating || 0,
         status: 'available',
         premium: user.plan === 'premium',
+        images: previewImages,
       });
     }
     reset();
     setShowForm(false);
     setEditingProduct(null);
+    setPreviewImages([]);
   };
 
   const canAddMore = user.plan === 'premium' || products.length < 3;
@@ -230,7 +243,7 @@ function Listings({ user, products, categories, addProduct, updateProduct, delet
           </p>
         </div>
         <button
-          onClick={() => { if (!canAddMore) { alert('Upgrade to Premium for unlimited listings!'); return; } setShowForm(true); setEditingProduct(null); reset(); }}
+          onClick={() => { if (!canAddMore) { alert('Upgrade to Premium for unlimited listings!'); return; } setShowForm(true); setEditingProduct(null); setPreviewImages([]); reset(); }}
           className="btn btn-primary"
           disabled={showForm}
         >
@@ -243,9 +256,24 @@ function Listings({ user, products, categories, addProduct, updateProduct, delet
         <div className="card card-body animate-fade-in">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
             <h3 style={{ fontWeight: 700 }}>{editingProduct ? 'Edit Listing' : 'Add New Listing'}</h3>
-            <button onClick={() => { setShowForm(false); setEditingProduct(null); reset(); }} className="btn btn-ghost btn-icon"><X size={18} /></button>
+            <button onClick={() => { setShowForm(false); setEditingProduct(null); setPreviewImages([]); reset(); }} className="btn btn-ghost btn-icon"><X size={18} /></button>
           </div>
           <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+            
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label className="form-label">Product Images</label>
+              <input type="file" multiple accept="image/*" onChange={handleImageChange} className="form-input" style={{ paddingTop: '0.45rem' }} />
+              {previewImages.length > 0 && (
+                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+                  {previewImages.map((src, i) => (
+                    <div key={i} style={{ position: 'relative', width: 80, height: 80, borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
+                      <img src={src} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="preview" />
+                      <button type="button" onClick={() => setPreviewImages(prev => prev.filter((_, idx) => idx !== i))} style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', borderRadius: '50%', width: 22, height: 22, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={12} /></button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label className="form-label">Product Name <span className="form-required">*</span></label>
               <input className={`form-input ${errors.title ? 'error' : ''}`} defaultValue={editingProduct?.title} placeholder="e.g. Premium Maize (Yellow Corn)" {...register('title', { required: 'Product name is required' })} />
@@ -294,9 +322,9 @@ function Listings({ user, products, categories, addProduct, updateProduct, delet
                 Delivery Available
               </label>
             </div>
-            <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '0.75rem' }}>
+            <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
               <button type="submit" className="btn btn-primary">{editingProduct ? 'Update Listing' : 'Publish Listing'}</button>
-              <button type="button" onClick={() => { setShowForm(false); setEditingProduct(null); reset(); }} className="btn btn-ghost">Cancel</button>
+              <button type="button" onClick={() => { setShowForm(false); setEditingProduct(null); setPreviewImages([]); reset(); }} className="btn btn-ghost">Cancel</button>
             </div>
           </form>
         </div>
@@ -315,7 +343,7 @@ function Listings({ user, products, categories, addProduct, updateProduct, delet
               <ProductCard product={p} />
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
                 <button
-                  onClick={() => { setEditingProduct(p); setShowForm(true); reset(); }}
+                  onClick={() => { setEditingProduct(p); setShowForm(true); setPreviewImages(p.images || []); reset(); }}
                   className="btn btn-secondary btn-sm"
                   style={{ flex: 1 }}
                 >
@@ -344,12 +372,12 @@ function Orders({ user, orders, updateOrder }) {
   const [filter, setFilter] = useState('all');
 
   const filtered = orders.filter(o => filter === 'all' || o.status === filter);
-  const statusColors = { pending: 'var(--amber-500)', accepted: 'var(--green-600)', rejected: '#ef4444', counter: '#8b5cf6' };
+  const statusColors = { pending: 'var(--amber-500)', accepted: 'var(--blue-500)', shipped: 'var(--indigo-500)', completed: 'var(--green-600)', rejected: '#ef4444' };
 
   return (
     <div>
-      <div className="tabs" style={{ marginBottom: '1.25rem' }}>
-        {['all', 'pending', 'accepted', 'rejected'].map(s => (
+      <div className="tabs" style={{ marginBottom: '1.25rem', overflowX: 'auto', whiteSpace: 'nowrap', pb: 2 }}>
+        {['all', 'pending', 'accepted', 'shipped', 'completed', 'rejected'].map(s => (
           <button key={s} className={`tab ${filter === s ? 'active' : ''}`} onClick={() => setFilter(s)} style={{ textTransform: 'capitalize' }}>{s}</button>
         ))}
       </div>
@@ -384,17 +412,62 @@ function Orders({ user, orders, updateOrder }) {
                 <div><span style={{ fontSize: '0.8rem', color: 'var(--slate-400)' }}>Total</span><div style={{ fontWeight: 700, color: 'var(--green-700)' }}>GHS {(order.offerPrice * order.quantity).toLocaleString()}</div></div>
               </div>
 
+              {/* Action buttons lifecycle */}
               {user.role === 'farmer' && order.status === 'pending' && (
                 <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
                   <button onClick={() => updateOrder(order.id, { status: 'accepted' })} className="btn btn-primary btn-sm">
-                    <CheckCircle size={14} /> Accept
+                    <CheckCircle size={14} /> Accept Offer
                   </button>
                   <button onClick={() => updateOrder(order.id, { status: 'rejected' })} className="btn btn-danger btn-sm">
                     <X size={14} /> Reject
                   </button>
                 </div>
               )}
+              {user.role === 'farmer' && order.status === 'accepted' && (
+                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+                  <button onClick={() => updateOrder(order.id, { status: 'shipped' })} className="btn btn-secondary btn-sm" style={{ background: 'var(--blue-600)', color: '#fff', borderColor: 'var(--blue-600)' }}>
+                    <Truck size={14} /> Mark as Shipped
+                  </button>
+                </div>
+              )}
+              {user.role === 'buyer' && order.status === 'shipped' && (
+                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+                  <button onClick={() => updateOrder(order.id, { status: 'completed' })} className="btn btn-primary btn-sm">
+                    <CheckCircle size={14} /> Confirm Receipt
+                  </button>
+                </div>
+              )}
+              {order.status === 'completed' && (
+                <div style={{ marginTop: '1rem', padding: '0.625rem 0.875rem', background: 'var(--green-50)', color: 'var(--green-700)', border: '1px solid var(--green-200)', borderRadius: 'var(--radius-md)', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <CheckCircle size={16} /> Order Successfully Completed
+                </div>
+              )}
             </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SavedItems() {
+  const { products, savedItems } = useData();
+  const savedProducts = products.filter(p => savedItems.includes(p.id));
+
+  return (
+    <div>
+      <h2 style={{ fontWeight: 800, marginBottom: '1.5rem' }}>Saved Items</h2>
+      {savedProducts.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-state-icon"><Heart size={28} /></div>
+          <h3>Your wishlist is empty</h3>
+          <p style={{ color: 'var(--slate-500)', fontSize: '0.875rem', marginBottom: '1rem' }}>You haven't saved any listings yet.</p>
+          <Link to="/marketplace" className="btn btn-primary btn-sm">Browse Marketplace</Link>
+        </div>
+      ) : (
+        <div className="grid-products">
+          {savedProducts.map(p => (
+            <ProductCard key={p.id} product={p} />
           ))}
         </div>
       )}

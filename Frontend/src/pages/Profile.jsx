@@ -11,7 +11,7 @@ import ProductCard from '../components/ProductCard';
 
 export default function Profile() {
   const { user, logout, updateProfile } = useAuth();
-  const { products, reviews } = useData();
+  const { products, reviews, addToast } = useData();
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm();
@@ -34,6 +34,16 @@ export default function Profile() {
   const onSave = (data) => {
     updateProfile(data);
     setEditing(false);
+    addToast("Profile details updated! 💾");
+  };
+
+  const handleAvatarUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      updateProfile({ avatar: imageUrl });
+      addToast("Profile picture updated! 📷");
+    }
   };
 
   const initials = user.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
@@ -48,12 +58,20 @@ export default function Profile() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '-52px', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem' }}>
             <div style={{ position: 'relative' }}>
-              <div className="avatar" style={{ width: 100, height: 100, fontSize: '2rem', border: '4px solid #fff', boxShadow: 'var(--shadow-md)' }}>
-                {initials}
+              <div className="avatar" style={{ width: 100, height: 100, fontSize: '2rem', border: '4px solid #fff', boxShadow: 'var(--shadow-md)', overflow: 'hidden' }}>
+                {user.avatar ? (
+                  <img src={user.avatar} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  initials
+                )}
               </div>
-              <button style={{ position: 'absolute', bottom: 4, right: 4, width: 28, height: 28, borderRadius: '50%', background: 'var(--green-600)', border: '2px solid #fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+              <button 
+                onClick={() => document.getElementById('avatar-upload').click()}
+                style={{ position: 'absolute', bottom: 4, right: 4, width: 28, height: 28, borderRadius: '50%', background: 'var(--green-600)', border: '2px solid #fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}
+              >
                 <Camera size={13} />
               </button>
+              <input type="file" id="avatar-upload" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarUpload} />
             </div>
             <div style={{ marginBottom: '0.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

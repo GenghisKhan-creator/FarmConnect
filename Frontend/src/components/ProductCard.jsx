@@ -6,7 +6,8 @@ export default function ProductCard({ product }) {
   const navigate = useNavigate();
   const { categories } = useData();
   const categoryObj = categories?.find(c => c.name === product.category);
-  const imageSrc = categoryObj ? categoryObj.image : null;
+  const fallbackImg = categoryObj ? categoryObj.image : null;
+  const imageSrc = (product.images && product.images.length > 0) ? product.images[0] : fallbackImg;
 
   const getCategoryEmoji = (cat) => {
     const map = {

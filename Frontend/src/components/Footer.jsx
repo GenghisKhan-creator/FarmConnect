@@ -49,10 +49,10 @@ export default function Footer() {
           <div>
             <h4 style={{ color: '#fff', fontWeight: 700, marginBottom: '1rem', fontSize: '0.95rem' }}>Support</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
-              <FooterLink to="#">How it works</FooterLink>
-              <FooterLink to="#">FAQs</FooterLink>
-              <FooterLink to="#">Farmer Guide</FooterLink>
-              <FooterLink to="#">Buyer Guide</FooterLink>
+              <FooterLink to="/support?tab=how">How it works</FooterLink>
+              <FooterLink to="/support?tab=faq">FAQs</FooterLink>
+              <FooterLink to="/support?tab=farmer">Farmer Guide</FooterLink>
+              <FooterLink to="/support?tab=buyer">Buyer Guide</FooterLink>
             </div>
           </div>
 
@@ -72,8 +72,8 @@ export default function Footer() {
             © 2026 FarmConnect GH. Made with ❤️ for Ghana's farmers.
           </p>
           <div style={{ display: 'flex', gap: '1.25rem' }}>
-            <FooterLink to="#">Privacy Policy</FooterLink>
-            <FooterLink to="#">Terms of Use</FooterLink>
+            <FooterLink to="/privacy">Privacy Policy</FooterLink>
+            <FooterLink to="/terms">Terms of Use</FooterLink>
           </div>
         </div>
       </div>

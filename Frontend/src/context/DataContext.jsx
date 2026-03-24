@@ -14,6 +14,11 @@ import livestockImg from '../assets/livestock.jpg';
 import fruitsImg from '../assets/fruit.jpg';
 import yamsImg from '../assets/yam.jpg';
 
+import mockTomatoesImg from '../assets/mock_tomatoes.png';
+import mockMaizeImg from '../assets/mock_maize.png';
+import mockRiceImg from '../assets/mock_rice.png';
+import mockYamsImg from '../assets/mock_yams.png';
+
 const CATEGORIES = [
   { id: 1, name: 'Maize', icon: '🌽', image: maizeImg },
   { id: 2, name: 'Millet', icon: '🌾', image: milletsImg },
@@ -49,7 +54,7 @@ const INITIAL_PRODUCTS = [
     status: 'available',
     premium: true,
     createdAt: '2026-02-01',
-    images: [],
+    images: [mockMaizeImg],
     views: 284,
   },
   {
@@ -169,7 +174,7 @@ const INITIAL_PRODUCTS = [
     status: 'available',
     premium: false,
     createdAt: '2026-03-12',
-    images: [],
+    images: [mockTomatoesImg],
     views: 44,
   },
   {
@@ -193,7 +198,7 @@ const INITIAL_PRODUCTS = [
     status: 'available',
     premium: false,
     createdAt: '2026-02-15',
-    images: [],
+    images: [mockRiceImg],
     views: 187,
   },
   {
@@ -219,6 +224,30 @@ const INITIAL_PRODUCTS = [
     createdAt: '2026-02-20',
     images: [],
     views: 63,
+  },
+  {
+    id: 9,
+    farmerId: 5,
+    farmerName: 'Faustina Dery',
+    farmName: 'Dery Farms',
+    farmerVerified: false,
+    farmerRating: 4.2,
+    title: 'Freshly Harvested Puna Yams',
+    category: 'Yams',
+    description: 'Large, fresh puna yams freshly dug out. Big sizes. Excellent for cooking, pounding and roasting.',
+    quantity: 150,
+    unit: 'tubers',
+    price: 35,
+    location: 'Wa',
+    district: 'Wa Municipal',
+    region: 'Upper West',
+    harvestDate: '2026-03-24',
+    deliveryAvailable: true,
+    status: 'available',
+    premium: true,
+    createdAt: '2026-03-24',
+    images: [mockYamsImg],
+    views: 450,
   },
 ];
 
@@ -298,11 +327,26 @@ const INITIAL_REVIEWS = [
   { id: 3, buyerId: 10, buyerName: 'Comfort Oduro', farmerId: 1, rating: 5, comment: 'Very honest farmer. Highly recommend for bulk purchases!', createdAt: '2026-01-10' },
 ];
 
+const INITIAL_REPORTS = [
+  { id: 1, reportedUserId: 4, reportedUserName: 'Abass Mohammed', reporterId: 2, reason: 'fake_listing', status: 'pending', createdAt: '2026-03-20' }
+];
+
+const INITIAL_NOTIFICATIONS = [
+  { id: 1, userId: 2, text: 'Your offer for Premium Maize has been accepted!', read: false, createdAt: new Date().toISOString(), type: 'order' },
+  { id: 2, userId: 2, text: 'You have unread messages.', read: true, createdAt: new Date(Date.now() - 86400000).toISOString(), type: 'message' },
+];
+
 export function DataProvider({ children }) {
   const [products, setProducts] = useState(INITIAL_PRODUCTS);
   const [orders, setOrders] = useState(INITIAL_ORDERS);
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
-  const [reviews] = useState(INITIAL_REVIEWS);
+  const [reviews, setReviews] = useState(INITIAL_REVIEWS);
+  const [reports, setReports] = useState(INITIAL_REPORTS);
+  const [strikes, setStrikes] = useState({});
+  const [banned, setBanned] = useState([]);
+  const [savedItems, setSavedItems] = useState([]);
+  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+  const [toasts, setToasts] = useState([]);
 
   const addProduct = useCallback((product) => {
     const newProduct = {
@@ -340,13 +384,63 @@ export function DataProvider({ children }) {
     return newMsg;
   }, []);
 
+  const addReport = useCallback((data) => {
+    setReports(prev => [{ id: Date.now(), createdAt: new Date().toISOString().split('T')[0], status: 'pending', ...data }, ...prev]);
+  }, []);
+
+  const updateReport = useCallback((id, updates) => {
+    setReports(prev => prev.map(r => r.id === id ? { ...r, ...updates } : r));
+  }, []);
+
+  const addStrike = useCallback((userId) => {
+    setStrikes(prev => ({ ...prev, [userId]: (prev[userId] || 0) + 1 }));
+  }, []);
+
+  const toggleBan = useCallback((userId) => {
+    setBanned(prev => prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]);
+  }, []);
+
+  const addReview = useCallback((review) => {
+    const newReview = { ...review, id: Date.now(), createdAt: new Date().toISOString().split('T')[0] };
+    setReviews(prev => [newReview, ...prev]);
+    return newReview;
+  }, []);
+
+  const toggleSavedItem = useCallback((productId) => {
+    setSavedItems(prev => prev.includes(productId) ? prev.filter(id => id !== productId) : [...prev, productId]);
+  }, []);
+
+  const addNotification = useCallback((userId, text, type = 'general') => {
+    setNotifications(prev => [{ id: Date.now(), userId, text, type, read: false, createdAt: new Date().toISOString() }, ...prev]);
+  }, []);
+
+  const markNotificationsAsRead = useCallback((userId) => {
+    setNotifications(prev => prev.map(n => n.userId === userId ? { ...n, read: true } : n));
+  }, []);
+
+  const removeToast = useCallback((id) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  const addToast = useCallback((text, type = 'success') => {
+    const id = Date.now() + Math.random();
+    setToasts(prev => [...prev, { id, text, type }]);
+    setTimeout(() => removeToast(id), 3500);
+  }, [removeToast]);
+
   return (
     <DataContext.Provider value={{
       categories: CATEGORIES,
       products, addProduct, updateProduct, deleteProduct,
       orders, addOrder, updateOrder,
       messages, sendMessage,
-      reviews,
+      reviews, addReview,
+      reports, addReport, updateReport,
+      strikes, addStrike,
+      banned, toggleBan,
+      savedItems, toggleSavedItem,
+      notifications, addNotification, markNotificationsAsRead,
+      toasts, addToast, removeToast
     }}>
       {children}
     </DataContext.Provider>

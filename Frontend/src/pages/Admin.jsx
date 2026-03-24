@@ -17,7 +17,7 @@ const MOCK_ALL_USERS = [
 
 export default function Admin() {
   const { user } = useAuth();
-  const { products, deleteProduct } = useData();
+  const { products, deleteProduct, reports, updateReport, strikes, addStrike, banned, toggleBan } = useData();
   const [tab, setTab] = useState('overview');
   const [userSearch, setUserSearch] = useState('');
   const [prodSearch, setProdSearch] = useState('');
@@ -52,6 +52,7 @@ export default function Admin() {
     { key: 'overview', label: 'Overview', icon: <BarChart3 size={16} /> },
     { key: 'users', label: `Users (${MOCK_ALL_USERS.length})`, icon: <Users size={16} /> },
     { key: 'listings', label: `Listings (${products.length})`, icon: <Package size={16} /> },
+    { key: 'reports', label: `Reports (${reports.filter(r => r.status === 'pending').length})`, icon: <AlertTriangle size={16} /> },
   ];
 
   return (
@@ -103,6 +104,19 @@ export default function Admin() {
                   </div>
                 </div>
               ))}
+              
+              {/* Reports Stat Card */}
+              <div className="stat-card" style={{ borderColor: '#fecaca', background: '#fef2f2' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <div className="stat-value" style={{ color: '#dc2626' }}>{reports.filter(r => r.status === 'pending').length}</div>
+                    <div className="stat-label" style={{ color: '#dc2626' }}>Pending Fraud Reports</div>
+                  </div>
+                  <div style={{ padding: '0.625rem', borderRadius: 12, background: 'rgba(220, 38, 38, 0.1)', color: '#dc2626' }}>
+                    <AlertTriangle size={22} />
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Alerts */}
@@ -198,6 +212,60 @@ export default function Admin() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Reports */}
+        {tab === 'reports' && (
+          <div>
+            <h3 style={{ fontWeight: 700, marginBottom: '1.25rem' }}>User Reports & Investigations</h3>
+            {reports.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-state-icon"><Shield size={28} /></div>
+                <h3>No reports</h3>
+                <p style={{ color: 'var(--slate-500)', fontSize: '0.875rem' }}>All good! No investigations currently needed.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {reports.slice().reverse().map(report => {
+                  const isBanned = banned.includes(report.reportedUserId);
+                  const strikeCount = strikes[report.reportedUserId] || 0;
+                  return (
+                    <div key={report.id} className="card card-body" style={{ borderLeft: report.status === 'pending' ? '4px solid #ef4444' : '4px solid var(--green-500)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                            <h4 style={{ fontWeight: 700 }}>Report against: {report.reportedUserName}</h4>
+                            <span className={`badge ${report.status === 'pending' ? 'badge-red' : 'badge-green'}`}>{report.status}</span>
+                            {isBanned && <span className="badge badge-slate" style={{ background: '#000', color: '#fff' }}>Banned</span>}
+                          </div>
+                          <p style={{ fontSize: '0.875rem', color: 'var(--slate-600)', marginBottom: '0.25rem' }}>
+                            <strong>Reason:</strong> <span style={{ textTransform: 'capitalize' }}>{report.reason.replace('_', ' ')}</span>
+                          </p>
+                          <p style={{ fontSize: '0.8rem', color: 'var(--slate-500)' }}>
+                            Reported Date: {report.createdAt} · Current Strikes: <strong style={{ color: strikeCount > 0 ? '#ef4444' : 'inherit' }}>{strikeCount}</strong>
+                          </p>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          {report.status === 'pending' && (
+                            <button onClick={() => updateReport(report.id, { status: 'investigated' })} className="btn btn-secondary btn-sm">
+                              <CheckCircle size={14} /> Mark Investigated
+                            </button>
+                          )}
+                          <button onClick={() => addStrike(report.reportedUserId)} className="btn btn-sm" style={{ background: 'var(--amber-100)', color: '#b45309' }}>
+                            <AlertTriangle size={14} /> Add Strike
+                          </button>
+                          <button onClick={() => toggleBan(report.reportedUserId)} className={`btn btn-sm ${isBanned ? 'btn-ghost' : 'btn-danger'}`}>
+                            {isBanned ? 'Unban User' : 'Ban User'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>

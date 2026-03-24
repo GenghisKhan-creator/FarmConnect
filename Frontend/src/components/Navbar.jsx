@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useData } from '../context/DataContext';
 import {
   Sprout, Search, Bell, Menu, X, ChevronDown,
   User, LogOut, Settings, LayoutDashboard, ShoppingBag,
@@ -10,17 +11,23 @@ import logoImg from '../assets/logo.jpg';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { notifications, markNotificationsAsRead } = useData();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef(null);
+  const notifRef = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(e) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setDropdownOpen(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotifOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -38,6 +45,9 @@ export default function Navbar() {
       setSearchQuery('');
     }
   };
+
+  const userNotifications = notifications?.filter(n => n.userId === user?.id) || [];
+  const unreadCount = userNotifications.filter(n => !n.read).length;
 
   const initials = user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?';
 
@@ -89,21 +99,60 @@ export default function Navbar() {
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           {user ? (
             <>
-              <button
-                className="btn btn-ghost btn-icon hide-mobile"
-                style={{ position: 'relative' }}
-                title="Notifications"
-              >
-                <Bell size={20} />
-                <span className="notif-dot" />
-              </button>
+              {/* Notifications dropdown */}
+              <div className="dropdown hide-mobile" ref={notifRef}>
+                <button
+                  className="btn btn-ghost btn-icon"
+                  style={{ position: 'relative' }}
+                  title="Notifications"
+                  onClick={() => {
+                    setNotifOpen(p => !p);
+                    setDropdownOpen(false);
+                    if (!notifOpen && unreadCount > 0) markNotificationsAsRead(user.id);
+                  }}
+                >
+                  <Bell size={20} />
+                  {unreadCount > 0 && <span className="notif-dot" style={{ position: 'absolute', top: 6, right: 6, width: 8, height: 8, background: '#ef4444', borderRadius: '50%' }} />}
+                </button>
+                {notifOpen && (
+                  <div className="dropdown-menu" style={{ right: 0, width: 320, padding: 0 }}>
+                    <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <h4 style={{ fontWeight: 700, margin: 0 }}>Notifications</h4>
+                      {unreadCount > 0 && <span style={{ fontSize: '0.75rem', background: 'var(--green-100)', color: 'var(--green-700)', padding: '2px 8px', borderRadius: 999 }}>{unreadCount} new</span>}
+                    </div>
+                    <div style={{ maxHeight: 350, overflowY: 'auto' }}>
+                      {userNotifications.length === 0 ? (
+                        <div style={{ padding: '2rem 1rem', textAlign: 'center', color: 'var(--slate-500)', fontSize: '0.875rem' }}>
+                          <Bell size={24} style={{ opacity: 0.3, margin: '0 auto 0.5rem' }} />
+                          All caught up! No notifications.
+                        </div>
+                      ) : (
+                        userNotifications.map(n => (
+                          <div key={n.id} style={{ padding: '1rem', borderBottom: '1px solid var(--border)', background: n.read ? 'transparent' : 'var(--blue-50)', display: 'flex', gap: '0.75rem', cursor: 'pointer', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background='var(--slate-50)'} onMouseLeave={e => e.currentTarget.style.background=n.read?'transparent':'var(--blue-50)'} onClick={() => { if(n.type === 'message') navigate('/messages'); setNotifOpen(false); }}>
+                            <div style={{ flexShrink: 0, width: 8, height: 8, borderRadius: '50%', background: n.read ? 'transparent' : 'var(--blue-500)', marginTop: 6 }} />
+                            <div>
+                              <p style={{ fontSize: '0.875rem', color: 'var(--slate-800)', marginBottom: 4, lineHeight: 1.4 }}>{n.text}</p>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--slate-500)' }}>
+                                {new Date(n.createdAt).toLocaleDateString()} at {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Avatar dropdown */}
               <div className="dropdown" ref={dropdownRef}>
                 <button
-                  onClick={() => setDropdownOpen(p => !p)}
+                  onClick={() => { setDropdownOpen(p => !p); setNotifOpen(false); }}
                   style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0.375rem 0.625rem', borderRadius: 999, border: '1.5px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', transition: 'var(--transition)' }}
                 >
-                  <div className="avatar" style={{ width: 32, height: 32, fontSize: '0.75rem' }}>{initials}</div>
+                  <div className="avatar" style={{ width: 32, height: 32, fontSize: '0.75rem', overflow: 'hidden' }}>
+                    {user.avatar ? <img src={user.avatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
+                  </div>
                   <span className="hide-mobile" style={{ fontWeight: 600, fontSize: '0.875rem', maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.name?.split(' ')[0]}</span>
                   <ChevronDown size={14} style={{ color: 'var(--slate-400)' }} />
                 </button>

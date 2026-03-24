@@ -83,7 +83,9 @@ export default function Login() {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button type="button" className="btn btn-ghost btn-sm" style={{ fontSize: '0.875rem', color: 'var(--green-700)' }}>Forgot password?</button>
+            <Link to="/forgot-password" style={{ fontSize: '0.875rem', color: 'var(--green-700)', fontWeight: 600, textDecoration: 'none' }} onMouseEnter={e => e.target.style.textDecoration='underline'} onMouseLeave={e => e.target.style.textDecoration='none'}>
+              Forgot password?
+            </Link>
           </div>
 
           {error && (
