@@ -97,96 +97,121 @@ export default function Home() {
 
   return (
     <div ref={heroRef}>
-      {/* ── HERO ── */}
-      <section style={{
-        background: `url(${heroBg}) center/cover no-repeat`,
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%)' }}></div>
+      {/* ── NEW HERO ── */}
+      <section style={{ padding: '0.75rem', background: 'var(--surface)' }}>
+        <div style={{
+          position: 'relative',
+          borderRadius: '32px',
+          overflow: 'hidden',
+          background: 'linear-gradient(180deg, #093c1d 0%, #175e30 50%, #2f8c47 100%)',
+          minHeight: '85vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          paddingTop: '6rem',
+        }}>
+          {/* Background Image of Field at the bottom */}
+          <div style={{
+            position: 'absolute',
+            bottom: 0, left: 0, right: 0, height: '65%',
+            background: `url(${heroBg}) center bottom / cover no-repeat`,
+            opacity: 0.9,
+            zIndex: 0,
+            maskImage: 'linear-gradient(to bottom, transparent 0%, black 50%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 50%)',
+          }}></div>
 
-        {/* Giant Cut-Out Text Approximation */}
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -60%)', zIndex: 0, pointerEvents: 'none' }}>
-          {/* <h1 className="hero-giant-word" style={{
-            fontSize: 'clamp(8rem, 25vw, 25rem)',
-            fontWeight: 900,
-            color: '#fff',
-            lineHeight: 1,
-            margin: 0,
-            letterSpacing: '-0.02em',
-            textShadow: '0 20px 50px rgba(0,0,0,0.6)',
-            fontFamily: 'Montserrat, "Plus Jakarta Sans", sans-serif',
-            opacity: 0.95
-          }}>
-            FARM
-          </h1> */}
-        </div>
-
-        <div className="container" style={{ position: 'relative', zIndex: 1, textAlign: 'center', marginTop: '10vh' }}>
-          <div style={{ maxWidth: 680, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <p className="hero-sub" style={{
-              fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
-              color: 'rgba(255,255,255,0.95)',
-              lineHeight: 1.6,
-              marginBottom: '2rem',
-              maxWidth: '45ch',
-              fontWeight: 500,
-              textShadow: '0 2px 6px rgba(0,0,0,0.6)',
+          <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', width: '100%', padding: '0 2rem' }}>
+            <h2 className="hero-sub" style={{
+              color: '#fff',
+              fontSize: 'clamp(1.8rem, 4vw, 3.5rem)',
+              fontWeight: 400,
+              margin: 0,
+              lineHeight: 1.2,
+              fontFamily: 'Montserrat, sans-serif'
             }}>
-              As an agricultural platform, we're on a mission to make it simple for everyone to access fresh produce directly from farmers!
-            </p>
-
-            <Link to="/marketplace" className="hero-btns" style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: '#84cc16',
-              color: '#000',
-              fontWeight: 700,
-              padding: '1.1rem 2.5rem',
-              borderRadius: '999px',
-              textDecoration: 'none',
-              fontSize: '0.9rem',
-              letterSpacing: '0.05em',
-              textTransform: 'uppercase',
-              boxShadow: '0 10px 25px rgba(132, 204, 22, 0.3)',
-              transition: 'transform 0.3s, box-shadow 0.3s'
-            }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 15px 35px rgba(132, 204, 22, 0.4)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 25px rgba(132, 204, 22, 0.3)'; }}
-            >
-              BROWSE MARKETPLACE
-            </Link>
+              Cultivating a Greener Future
+            </h2>
+            <h2 className="hero-sub" style={{
+              color: '#fff',
+              fontSize: 'clamp(1.8rem, 4vw, 3.5rem)',
+              fontWeight: 400,
+              margin: 0,
+              lineHeight: 1.2,
+              fontFamily: 'Montserrat, sans-serif',
+              marginBottom: '1rem'
+            }}>
+              Through <span style={{ fontStyle: 'italic', fontWeight: 300 }}>Sustainable</span>
+            </h2>
+            <h1 className="hero-giant-word" style={{
+              color: '#7ef03b',
+              fontSize: 'clamp(3.5rem, 13vw, 12rem)',
+              fontWeight: 900,
+              margin: 0,
+              lineHeight: 0.85,
+              letterSpacing: '0.01em',
+              textShadow: '0 15px 40px rgba(0,0,0,0.4)',
+              fontFamily: '"Plus Jakarta Sans", sans-serif'
+            }}>
+              AGRICULTURE
+            </h1>
           </div>
         </div>
 
-        {/* Side Nav Arrows */}
-        <button className="hero-badge" style={{ position: 'absolute', left: '4vw', top: '50%', transform: 'translateY(-50%)', width: 44, height: 44, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.3)', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', cursor: 'pointer', zIndex: 10, transition: 'all 0.3s' }} onMouseEnter={e => { e.currentTarget.style.borderColor = '#84cc16'; e.currentTarget.style.color = '#84cc16'; }} onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; e.currentTarget.style.color = '#fff'; }}>
-          <ChevronLeft size={20} />
-        </button>
-        <button className="hero-badge" style={{ position: 'absolute', right: '4vw', top: '50%', transform: 'translateY(-50%)', width: 44, height: 44, borderRadius: '50%', border: '1px solid #84cc16', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#84cc16', cursor: 'pointer', zIndex: 10, transition: 'all 0.3s', borderColor: '#84cc16' }}>
-          <ChevronRight size={20} />
-        </button>
+        {/* The Overlapping Bottom Cards */}
+        <div className="container hero-btns" style={{ position: 'relative', zIndex: 2, marginTop: '-5rem', paddingBottom: '3rem' }}>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+            gap: '2.5rem', 
+            alignItems: 'center',
+            background: '#fff',
+            borderRadius: '24px',
+            padding: '2.5rem',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.1)'
+          }}>
+            {/* Left Card */}
+            <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: '#1f2937', lineHeight: 1.3 }}>Enhancing Soil Health<br/>For Stronger Plants</h3>
+                <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0 0 1rem 0', lineHeight: 1.5 }}>Healthy soil ensures strong plants through sustainable practices.</p>
+                <Link to="/marketplace" style={{ color: '#0d4a22', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Learn More <ArrowRight size={14} />
+                </Link>
+              </div>
+              <div style={{
+                width: 90, height: 90, background: 'var(--green-100)', borderRadius: '50% 50% 0px 50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                color: 'var(--green-700)', border: '6px solid #f8fafc', boxShadow: '0 10px 20px rgba(0,0,0,0.08)'
+              }}>
+                <Sprout size={36} />
+              </div>
+            </div>
 
-        {/* Bottom Socials */}
-        <div style={{ position: 'absolute', bottom: '2.5rem', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '1.5rem', zIndex: 10, alignItems: 'center' }}>
-          <Facebook size={18} color="#fff" style={{ cursor: 'pointer', opacity: 0.7, transition: 'opacity 0.2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.7} />
-          <Instagram size={18} color="#fff" style={{ cursor: 'pointer', opacity: 0.7, transition: 'opacity 0.2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.7} />
-          <Youtube size={18} color="#fff" style={{ cursor: 'pointer', opacity: 0.7, transition: 'opacity 0.2s' }} onMouseEnter={e => e.currentTarget.style.opacity = 1} onMouseLeave={e => e.currentTarget.style.opacity = 0.7} />
-        </div>
+            {/* Middle Text */}
+            <div style={{ textAlign: 'center', padding: '0 1rem' }}>
+              <h3 style={{ fontSize: '1.4rem', fontWeight: 600, color: '#1f2937', margin: 0, lineHeight: 1.4 }}>
+                Transforming <span style={{ fontStyle: 'italic', fontWeight: 400 }}>Agriculture</span><br />
+                with Smart Solutions For<br />
+                <span style={{ fontStyle: 'italic', fontWeight: 400 }}>Sustainable</span> Future
+              </h3>
+            </div>
 
-        {/* Bottom Right Video Card */}
-        <div className="hero-search" style={{ position: 'absolute', bottom: '2.5rem', right: '4vw', width: 220, height: 120, borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', zIndex: 10, cursor: 'pointer', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', transition: 'transform 0.3s' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
-          <img src={farmerThumb} alt="Video thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%)' }}></div>
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ width: 44, height: 44, borderRadius: '50%', border: '1px solid rgba(132,204,22,0.6)', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#84cc16' }}>
-              <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#84cc16', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000' }}>
-                <Play size={14} style={{ marginLeft: 3 }} fill="#000" color="#000" />
+            {/* Right Card */}
+            <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
+              <div style={{
+                width: 90, height: 90, background: '#fef3c7', borderRadius: '50% 50% 50% 0px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                color: '#d97706', border: '6px solid #f8fafc', boxShadow: '0 10px 20px rgba(0,0,0,0.08)'
+              }}>
+                <Zap size={36} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: '#1f2937', lineHeight: 1.3 }}>Agriculture Integrated<br/>with Technology</h3>
+                <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0 0 1rem 0', lineHeight: 1.5 }}>Technology-integrated agriculture revolutionizes global farming.</p>
+                <Link to="/marketplace" style={{ color: '#0d4a22', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Learn More <ArrowRight size={14} />
+                </Link>
               </div>
             </div>
           </div>

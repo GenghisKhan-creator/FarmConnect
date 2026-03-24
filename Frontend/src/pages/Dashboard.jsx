@@ -95,17 +95,23 @@ export default function Dashboard() {
 }
 
 function Overview({ user, myProducts, myOrders }) {
+  const { reviews } = useData();
   const navigate = useNavigate();
   const activeListings = myProducts.filter(p => p.status === 'available').length;
   const completedOrders = myOrders.filter(o => o.status === 'accepted').length;
   const totalViews = myProducts.reduce((a, p) => a + (p.views || 0), 0);
+
+  const myReviews = reviews.filter(r => r.farmerId === user?.id);
+  const averageRating = myReviews.length > 0
+    ? (myReviews.reduce((sum, r) => sum + r.rating, 0) / myReviews.length).toFixed(1)
+    : 'New';
 
   const stats = user.role === 'farmer'
     ? [
       { label: 'Active Listings', value: activeListings, icon: <Package size={22} />, color: 'var(--green-600)' },
       { label: 'Total Orders', value: myOrders.length, icon: <ShoppingCart size={22} />, color: '#8b5cf6' },
       { label: 'Listing Views', value: totalViews, icon: <Eye size={22} />, color: 'var(--amber-500)' },
-      { label: 'Rating', value: `${user.rating || 4.8}★`, icon: <Star size={22} />, color: '#ef4444' },
+      { label: 'Rating', value: `${averageRating}★`, icon: <Star size={22} />, color: '#ef4444' },
     ]
     : [
       { label: 'Offers Sent', value: myOrders.length, icon: <ShoppingCart size={22} />, color: 'var(--green-600)' },
@@ -206,11 +212,11 @@ function Listings({ user, products, categories, addProduct, updateProduct, delet
     }
   };
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     if (editingProduct) {
       updateProduct(editingProduct.id, { ...data, price: Number(data.price), quantity: Number(data.quantity), images: previewImages });
     } else {
-      addProduct({
+      await addProduct({
         ...data,
         price: Number(data.price),
         quantity: Number(data.quantity),
@@ -370,6 +376,7 @@ function Listings({ user, products, categories, addProduct, updateProduct, delet
 
 function Orders({ user, orders, updateOrder }) {
   const [filter, setFilter] = useState('all');
+  const navigate = useNavigate();
 
   const filtered = orders.filter(o => filter === 'all' || o.status === filter);
   const statusColors = { pending: 'var(--amber-500)', accepted: 'var(--blue-500)', shipped: 'var(--indigo-500)', completed: 'var(--green-600)', rejected: '#ef4444' };
@@ -413,30 +420,38 @@ function Orders({ user, orders, updateOrder }) {
               </div>
 
               {/* Action buttons lifecycle */}
-              {user.role === 'farmer' && order.status === 'pending' && (
-                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
-                  <button onClick={() => updateOrder(order.id, { status: 'accepted' })} className="btn btn-primary btn-sm">
-                    <CheckCircle size={14} /> Accept Offer
-                  </button>
-                  <button onClick={() => updateOrder(order.id, { status: 'rejected' })} className="btn btn-danger btn-sm">
-                    <X size={14} /> Reject
-                  </button>
-                </div>
-              )}
-              {user.role === 'farmer' && order.status === 'accepted' && (
-                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                {user.role === 'farmer' && order.status === 'pending' && (
+                  <>
+                    <button onClick={() => updateOrder(order.id, { status: 'accepted' })} className="btn btn-primary btn-sm">
+                      <CheckCircle size={14} /> Accept Offer
+                    </button>
+                    <button onClick={() => updateOrder(order.id, { status: 'rejected' })} className="btn btn-danger btn-sm">
+                      <X size={14} /> Reject
+                    </button>
+                  </>
+                )}
+                {user.role === 'farmer' && order.status === 'accepted' && (
                   <button onClick={() => updateOrder(order.id, { status: 'shipped' })} className="btn btn-secondary btn-sm" style={{ background: 'var(--blue-600)', color: '#fff', borderColor: 'var(--blue-600)' }}>
                     <Truck size={14} /> Mark as Shipped
                   </button>
-                </div>
-              )}
-              {user.role === 'buyer' && order.status === 'shipped' && (
-                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+                )}
+                {user.role === 'buyer' && order.status === 'shipped' && (
                   <button onClick={() => updateOrder(order.id, { status: 'completed' })} className="btn btn-primary btn-sm">
                     <CheckCircle size={14} /> Confirm Receipt
                   </button>
-                </div>
-              )}
+                )}
+                
+                {['accepted', 'shipped', 'completed'].includes(order.status) && (
+                  <button 
+                    onClick={() => navigate('/messages', { state: { newConvUserId: user.role === 'farmer' ? order.buyerId : order.farmerId, newConvUserName: user.role === 'farmer' ? order.buyerName : order.farmerName, newConvFarmName: null } })} 
+                    className="btn btn-outline btn-sm"
+                  >
+                    <MessageCircle size={14} /> Message {user.role === 'farmer' ? 'Buyer' : 'Farmer'}
+                  </button>
+                )}
+              </div>
+
               {order.status === 'completed' && (
                 <div style={{ marginTop: '1rem', padding: '0.625rem 0.875rem', background: 'var(--green-50)', color: 'var(--green-700)', border: '1px solid var(--green-200)', borderRadius: 'var(--radius-md)', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
                   <CheckCircle size={16} /> Order Successfully Completed

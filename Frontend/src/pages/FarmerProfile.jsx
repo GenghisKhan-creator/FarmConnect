@@ -8,13 +8,12 @@ import ProductCard from '../components/ProductCard';
 
 export default function FarmerProfile() {
   const { id } = useParams();
-  const farmerIdNum = Number(id);
   const { products, reviews, strikes, banned, addReport } = useData();
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const farmerProducts = products.filter(p => p.farmerId === farmerIdNum);
-  const farmerReviews = reviews.filter(r => r.farmerId === farmerIdNum);
+  const farmerProducts = products.filter(p => String(p.farmerId) === id);
+  const farmerReviews = reviews.filter(r => String(r.farmerId) === id);
 
   // Derive farmer info from their first product (mockup workaround since we don't have a users table)
   const farmerInfo = farmerProducts.length > 0 ? {
@@ -37,11 +36,11 @@ export default function FarmerProfile() {
 
   const handleMessage = () => {
     if (!user) { navigate('/login'); return; }
-    navigate('/messages');
+    navigate('/messages', { state: { newConvUserId: id, newConvUserName: farmerInfo.name, newConvFarmName: farmerInfo.farmName } });
   };
 
-  const isBanned = banned.includes(farmerIdNum);
-  const hasStrikes = strikes[farmerIdNum] > 0;
+  const isBanned = banned.includes(id);
+  const hasStrikes = strikes[id] > 0;
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', paddingBottom: '4rem' }}>

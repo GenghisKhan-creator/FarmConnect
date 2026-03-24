@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Link } from 'react-router-dom';
 import {
   Users, Package, ShoppingCart, TrendingUp, Shield, Trash2,
@@ -7,20 +8,28 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 
-const MOCK_ALL_USERS = [
-  { id: 1, name: 'Issah Abubakari', email: 'issah@farmconnect.gh', role: 'farmer', plan: 'premium', verified: true, createdAt: '2026-01-01', location: 'Tumu' },
-  { id: 2, name: 'Amina Seidu', email: 'amina@buyer.gh', role: 'buyer', plan: 'free', verified: false, createdAt: '2026-01-15', location: 'Wa' },
-  { id: 4, name: 'Abass Mohammed', email: 'abass@agro.gh', role: 'farmer', plan: 'free', verified: true, createdAt: '2025-12-20', location: 'Lawra' },
-  { id: 5, name: 'Faustina Dery', email: 'faustina@farm.gh', role: 'farmer', plan: 'free', verified: false, createdAt: '2026-01-10', location: 'Wa' },
-  { id: 6, name: 'Dramani Yakubu', email: 'dramani@coop.gh', role: 'farmer', plan: 'premium', verified: true, createdAt: '2025-11-30', location: 'Nandom' },
-];
+
 
 export default function Admin() {
   const { user } = useAuth();
   const { products, deleteProduct, reports, updateReport, strikes, addStrike, banned, toggleBan } = useData();
+  const [allUsers, setAllUsers] = useState([]);
   const [tab, setTab] = useState('overview');
   const [userSearch, setUserSearch] = useState('');
   const [prodSearch, setProdSearch] = useState('');
+
+  useEffect(() => {
+    async function fetchUsers() {
+      if (user?.role !== 'admin') return;
+      try {
+        const { data } = await axios.get('http://localhost:5000/api/users');
+        setAllUsers(data);
+      } catch (err) {
+        console.error("Failed to load users", err);
+      }
+    }
+    fetchUsers();
+  }, [user]);
 
   if (!user || user.role !== 'admin') {
     return (
@@ -33,12 +42,12 @@ export default function Admin() {
     );
   }
 
-  const totalFarmers = MOCK_ALL_USERS.filter(u => u.role === 'farmer').length;
-  const totalBuyers = MOCK_ALL_USERS.filter(u => u.role === 'buyer').length;
-  const totalPremium = MOCK_ALL_USERS.filter(u => u.plan === 'premium').length;
-  const unverified = MOCK_ALL_USERS.filter(u => u.role === 'farmer' && !u.verified).length;
+  const totalFarmers = allUsers.filter(u => u.role === 'farmer').length;
+  const totalBuyers = allUsers.filter(u => u.role === 'buyer').length;
+  const totalPremium = allUsers.filter(u => u.plan === 'premium').length;
+  const unverified = allUsers.filter(u => u.role === 'farmer' && !u.verified).length;
 
-  const filteredUsers = MOCK_ALL_USERS.filter(u =>
+  const filteredUsers = allUsers.filter(u =>
     u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
     u.email.toLowerCase().includes(userSearch.toLowerCase())
   );
@@ -50,7 +59,7 @@ export default function Admin() {
 
   const TABS = [
     { key: 'overview', label: 'Overview', icon: <BarChart3 size={16} /> },
-    { key: 'users', label: `Users (${MOCK_ALL_USERS.length})`, icon: <Users size={16} /> },
+    { key: 'users', label: `Users (${allUsers.length})`, icon: <Users size={16} /> },
     { key: 'listings', label: `Listings (${products.length})`, icon: <Package size={16} /> },
     { key: 'reports', label: `Reports (${reports.filter(r => r.status === 'pending').length})`, icon: <AlertTriangle size={16} /> },
   ];

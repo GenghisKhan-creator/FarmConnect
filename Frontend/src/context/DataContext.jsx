@@ -1,5 +1,7 @@
-// Central mock data store for the FarmConnect GH application
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import axios from 'axios';
+import CryptoJS from 'crypto-js';
+import { io } from 'socket.io-client';
 
 const DataContext = createContext(null);
 
@@ -251,141 +253,203 @@ const INITIAL_PRODUCTS = [
   },
 ];
 
-const INITIAL_ORDERS = [
-  {
-    id: 1,
-    buyerId: 2,
-    buyerName: 'Amina Seidu',
-    farmerId: 1,
-    farmerName: 'Issah Abubakari',
-    productId: 1,
-    productTitle: 'Premium Maize (Yellow Corn)',
-    quantity: 40,
-    offerPrice: 330,
-    status: 'accepted',
-    createdAt: '2026-03-01',
-    note: 'Looking for regular supply each month.',
-  },
-  {
-    id: 2,
-    buyerId: 2,
-    buyerName: 'Amina Seidu',
-    farmerId: 1,
-    farmerName: 'Issah Abubakari',
-    productId: 2,
-    productTitle: 'Shelled Groundnuts',
-    quantity: 20,
-    offerPrice: 260,
-    status: 'pending',
-    createdAt: '2026-03-10',
-    note: 'Can you consider 260 per bag?',
-  },
-];
-
-const INITIAL_MESSAGES = [
-  {
-    id: 1,
-    conversationId: 1,
-    senderId: 2,
-    receiverId: 1,
-    message: 'Hello Issah, can you supply 50 bags of maize this month?',
-    timestamp: '2026-03-01T10:30:00',
-    read: true,
-  },
-  {
-    id: 2,
-    conversationId: 1,
-    senderId: 1,
-    receiverId: 2,
-    message: 'Hello Amina! Yes, I can supply 50 bags. Delivery can be done next week.',
-    timestamp: '2026-03-01T11:00:00',
-    read: true,
-  },
-  {
-    id: 3,
-    conversationId: 1,
-    senderId: 2,
-    receiverId: 1,
-    message: 'Great! Can you do GHS 330 per bag instead of 350?',
-    timestamp: '2026-03-01T11:15:00',
-    read: true,
-  },
-  {
-    id: 4,
-    conversationId: 1,
-    senderId: 1,
-    receiverId: 2,
-    message: 'I can do 340 per bag since you are buying in bulk. That is my best offer.',
-    timestamp: '2026-03-01T11:45:00',
-    read: false,
-  },
-];
-
-const INITIAL_REVIEWS = [
-  { id: 1, buyerId: 2, buyerName: 'Amina Seidu', farmerId: 1, rating: 5, comment: 'Excellent quality maize! Delivered on time and well-packaged.', createdAt: '2026-02-15' },
-  { id: 2, buyerId: 9, buyerName: 'Bernard Asante', farmerId: 1, rating: 4, comment: 'Good product overall. Slightly underweight bags but otherwise great.', createdAt: '2026-01-28' },
-  { id: 3, buyerId: 10, buyerName: 'Comfort Oduro', farmerId: 1, rating: 5, comment: 'Very honest farmer. Highly recommend for bulk purchases!', createdAt: '2026-01-10' },
-];
-
-const INITIAL_REPORTS = [
-  { id: 1, reportedUserId: 4, reportedUserName: 'Abass Mohammed', reporterId: 2, reason: 'fake_listing', status: 'pending', createdAt: '2026-03-20' }
-];
-
-const INITIAL_NOTIFICATIONS = [
-  { id: 1, userId: 2, text: 'Your offer for Premium Maize has been accepted!', read: false, createdAt: new Date().toISOString(), type: 'order' },
-  { id: 2, userId: 2, text: 'You have unread messages.', read: true, createdAt: new Date(Date.now() - 86400000).toISOString(), type: 'message' },
-];
-
 export function DataProvider({ children }) {
-  const [products, setProducts] = useState(INITIAL_PRODUCTS);
-  const [orders, setOrders] = useState(INITIAL_ORDERS);
-  const [messages, setMessages] = useState(INITIAL_MESSAGES);
-  const [reviews, setReviews] = useState(INITIAL_REVIEWS);
-  const [reports, setReports] = useState(INITIAL_REPORTS);
+  const [products, setProducts] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [reports, setReports] = useState([]);
   const [strikes, setStrikes] = useState({});
   const [banned, setBanned] = useState([]);
   const [savedItems, setSavedItems] = useState([]);
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState([]);
   const [toasts, setToasts] = useState([]);
 
-  const addProduct = useCallback((product) => {
-    const newProduct = {
-      ...product,
-      id: Date.now(),
-      views: 0,
-      createdAt: new Date().toISOString().split('T')[0],
-      images: [],
-    };
-    setProducts(prev => [newProduct, ...prev]);
-    return newProduct;
+  const [socket, setSocket] = useState(null);
+
+  const fetchLiveAuthData = useCallback(async () => {
+    const token = localStorage.getItem('farmconnect_token');
+    if (!token) return;
+    const config = { headers: { Authorization: `Bearer ${token}` } };
+    try {
+      axios.get('http://localhost:5000/api/data/orders', config).then(res => setOrders(res.data)).catch(() => {});
+      axios.get('http://localhost:5000/api/data/reports', config).then(res => setReports(res.data)).catch(() => {});
+      axios.get('http://localhost:5000/api/data/messages', config).then(res => {
+        const decryptedMsgs = res.data.map(m => {
+          try {
+            const bytes = CryptoJS.AES.decrypt(m.message, m.conversationId + "_fckey_v1");
+            const plainText = bytes.toString(CryptoJS.enc.Utf8);
+            return { ...m, message: plainText || m.message };
+          } catch(e) { return m; } // Fallback for plain unencrypted records
+        });
+        setMessages(decryptedMsgs);
+      }).catch(() => {});
+      axios.get('http://localhost:5000/api/data/notifications', config).then(res => setNotifications(res.data)).catch(() => {});
+    } catch(err) {}
   }, []);
 
-  const updateProduct = useCallback((id, updates) => {
-    setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+  useEffect(() => {
+    const token = localStorage.getItem('farmconnect_token');
+    let userId = null;
+    if (token) {
+      try { userId = JSON.parse(atob(token.split('.')[1])).id; } catch(e){}
+    }
+    const newSocket = io('http://localhost:5000');
+    if (userId) newSocket.emit('register', userId);
+    setSocket(newSocket);
+
+    newSocket.on('receive_message', (msg) => {
+      let plainText = msg.message;
+      try {
+        const bytes = CryptoJS.AES.decrypt(msg.message, msg.conversationId + "_fckey_v1");
+        plainText = bytes.toString(CryptoJS.enc.Utf8) || msg.message;
+      } catch(e) {}
+      
+      setMessages(prev => {
+        if (prev.find(m => m.id === msg.id)) return prev;
+        return [...prev, { ...msg, message: plainText }];
+      });
+    });
+
+    newSocket.on('messages_read', (messageIds) => {
+      setMessages(prev => prev.map(m => messageIds.includes(m.id) ? { ...m, read: true } : m));
+    });
+
+    return () => newSocket.close();
   }, []);
 
-  const deleteProduct = useCallback((id) => {
-    setProducts(prev => prev.filter(p => p.id !== id));
+  const markMessagesAsRead = useCallback((messageIds, senderId) => {
+    if (messageIds.length === 0) return;
+    setMessages(prev => prev.map(m => messageIds.includes(m.id) ? { ...m, read: true } : m));
+    if (socket) {
+      socket.emit('mark_read', { messageIds, senderId });
+    }
+  }, [socket]);
+
+  useEffect(() => {
+    async function fetchLiveProducts() {
+      try {
+        const { data } = await axios.get('http://localhost:5000/api/products');
+        const hydratedData = data.map(p => ({
+            ...p,
+            images: p.category === 'Maize' ? [mockMaizeImg] : [],
+        }));
+        setProducts(hydratedData);
+      } catch (err) { }
+    }
+    
+    async function fetchLiveReviews() {
+        try {
+            const { data } = await axios.get('http://localhost:5000/api/data/reviews');
+            setReviews(data);
+        } catch(err) {}
+    }
+
+    fetchLiveProducts();
+    fetchLiveReviews();
+    fetchLiveAuthData();
+    
+    // Poll personal data periodically to fake real-time interactions
+    const interval = setInterval(fetchLiveAuthData, 5000);
+    return () => clearInterval(interval);
+  }, [fetchLiveAuthData]);
+
+  const addProduct = useCallback(async (product) => {
+    try {
+      const token = localStorage.getItem('farmconnect_token');
+      const { data } = await axios.post('http://localhost:5000/api/products', product, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const newProduct = { ...data, images: [] };
+      setProducts(prev => [newProduct, ...prev]);
+      return newProduct;
+    } catch (err) {
+      console.error("Failed to post product to backend:", err);
+      return null;
+    }
   }, []);
 
-  const addOrder = useCallback((order) => {
-    const newOrder = { ...order, id: Date.now(), createdAt: new Date().toISOString().split('T')[0], status: 'pending' };
-    setOrders(prev => [newOrder, ...prev]);
-    return newOrder;
+  const updateProduct = useCallback(async (id, updates) => {
+    try {
+      const token = localStorage.getItem('farmconnect_token');
+      const { data } = await axios.put(`http://localhost:5000/api/products/${id}`, updates, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setProducts(prev => prev.map(p => p.id === id ? { ...p, ...data } : p));
+    } catch(err) { console.error('Failed to update product', err); }
   }, []);
 
-  const updateOrder = useCallback((id, updates) => {
-    setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
+  const deleteProduct = useCallback(async (id) => {
+    try {
+      const token = localStorage.getItem('farmconnect_token');
+      await axios.delete(`http://localhost:5000/api/products/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setProducts(prev => prev.filter(p => p.id !== id));
+    } catch(err) { console.error('Failed to delete product', err); }
   }, []);
 
-  const sendMessage = useCallback((msg) => {
-    const newMsg = { ...msg, id: Date.now(), timestamp: new Date().toISOString(), read: false };
-    setMessages(prev => [...prev, newMsg]);
-    return newMsg;
+  const recordView = useCallback(async (id) => {
+    try {
+      await axios.patch(`http://localhost:5000/api/products/${id}/view`);
+      setProducts(prev => prev.map(p => p.id === id ? { ...p, views: (p.views || 0) + 1 } : p));
+    } catch(err) {}
   }, []);
 
-  const addReport = useCallback((data) => {
-    setReports(prev => [{ id: Date.now(), createdAt: new Date().toISOString().split('T')[0], status: 'pending', ...data }, ...prev]);
+  const addOrder = useCallback(async (order) => {
+    try {
+      const token = localStorage.getItem('farmconnect_token');
+      const { data } = await axios.post('http://localhost:5000/api/data/orders', order, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setOrders(prev => [data, ...prev]);
+      return data;
+    } catch(err) { return null; }
+  }, []);
+
+  const updateOrder = useCallback(async (id, updates) => {
+    try {
+      const token = localStorage.getItem('farmconnect_token');
+      const { data } = await axios.put(`http://localhost:5000/api/data/orders/${id}`, updates, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setOrders(prev => prev.map(o => o.id === id ? data : o));
+    } catch(err) {}
+  }, []);
+
+  const sendMessage = useCallback(async (msg) => {
+    const tempId = Date.now().toString();
+    const optimisticMsg = { ...msg, id: tempId, timestamp: new Date().toISOString(), read: false };
+    // Quickly flash to UI
+    setMessages(prev => [...prev, optimisticMsg]);
+
+    try {
+      const token = localStorage.getItem('farmconnect_token');
+      const ciphertext = CryptoJS.AES.encrypt(msg.message, msg.conversationId + "_fckey_v1").toString();
+      
+      const payload = { ...msg, message: ciphertext };
+      const { data } = await axios.post('http://localhost:5000/api/data/messages', payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Update the temporary message with real DB message
+      setMessages(prev => prev.map(m => m.id === tempId ? { ...data, message: msg.message } : m));
+      return data;
+    } catch(err) {
+      // Revert if failed
+      setMessages(prev => prev.filter(m => m.id !== tempId));
+      return null;
+    }
+  }, []);
+
+  const addReport = useCallback(async (reportData) => {
+    try {
+      const token = localStorage.getItem('farmconnect_token');
+      const { data } = await axios.post('http://localhost:5000/api/data/reports', reportData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setReports(prev => [data, ...prev]);
+    } catch(err) {}
   }, []);
 
   const updateReport = useCallback((id, updates) => {
@@ -400,10 +464,15 @@ export function DataProvider({ children }) {
     setBanned(prev => prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]);
   }, []);
 
-  const addReview = useCallback((review) => {
-    const newReview = { ...review, id: Date.now(), createdAt: new Date().toISOString().split('T')[0] };
-    setReviews(prev => [newReview, ...prev]);
-    return newReview;
+  const addReview = useCallback(async (review) => {
+    try {
+      const token = localStorage.getItem('farmconnect_token');
+      const { data } = await axios.post('http://localhost:5000/api/data/reviews', review, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setReviews(prev => [data, ...prev]);
+      return data;
+    } catch(err) { return null; }
   }, []);
 
   const toggleSavedItem = useCallback((productId) => {
@@ -430,10 +499,11 @@ export function DataProvider({ children }) {
 
   return (
     <DataContext.Provider value={{
+      socket,
       categories: CATEGORIES,
-      products, addProduct, updateProduct, deleteProduct,
+      products, addProduct, updateProduct, deleteProduct, recordView,
       orders, addOrder, updateOrder,
-      messages, sendMessage,
+      messages, sendMessage, markMessagesAsRead,
       reviews, addReview,
       reports, addReport, updateReport,
       strikes, addStrike,

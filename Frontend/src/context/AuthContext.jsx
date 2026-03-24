@@ -1,92 +1,72 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
-// Demo users for mockup
-const DEMO_USERS = [
-  {
-    id: 1,
-    name: 'Issah Abubakari',
-    email: 'issah@farmconnect.gh',
-    phone: '0244123456',
-    role: 'farmer',
-    farmName: 'Issah Farms',
-    location: 'Tumu',
-    district: 'Sissala East',
-    region: 'Upper West',
-    farmSize: '10 acres',
-    crops: ['Maize', 'Millet', 'Groundnuts'],
-    rating: 4.8,
-    totalReviews: 24,
-    verified: true,
-    avatar: null,
-    plan: 'premium',
-  },
-  {
-    id: 2,
-    name: 'Amina Seidu',
-    email: 'amina@buyer.gh',
-    phone: '0243987654',
-    role: 'buyer',
-    businessName: 'Amina Traders',
-    businessType: 'Trader',
-    location: 'Wa',
-    district: 'Wa Municipal',
-    region: 'Upper West',
-    avatar: null,
-    plan: 'free',
-  },
-  {
-    id: 3,
-    name: 'Admin User',
-    email: 'admin@farmconnect.gh',
-    phone: '0200000001',
-    role: 'admin',
-    avatar: null,
-    plan: 'admin',
-  },
-];
+import axios from 'axios';
+
+const API_URL = 'http://localhost:5000/api';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchUser() {
+      const token = localStorage.getItem('farmconnect_token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const { data } = await axios.get(`${API_URL}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUser({ ...data, token });
+      } catch (err) {
+        console.error(err);
+        localStorage.removeItem('farmconnect_token');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchUser();
+  }, []);
 
   const login = useCallback(async ({ email, password }) => {
     setLoading(true);
     setError(null);
-    // Simulate async
-    await new Promise(r => setTimeout(r, 800));
-    const found = DEMO_USERS.find(u => u.email === email);
-    if (found && password.length >= 4) {
-      setUser(found);
+    try {
+      const { data } = await axios.post(`${API_URL}/auth/login`, { email, password });
+      setUser(data);
+      localStorage.setItem('farmconnect_token', data.token);
       setLoading(false);
-      return { success: true, user: found };
+      return { success: true, user: data };
+    } catch (err) {
+      setError(err.response?.data?.message || 'Invalid email or password.');
+      setLoading(false);
+      return { success: false };
     }
-    setError('Invalid email or password. Try issah@farmconnect.gh (farmer) or amina@buyer.gh (buyer) with any password.');
-    setLoading(false);
-    return { success: false };
   }, []);
 
-  const register = useCallback(async (data) => {
+  const register = useCallback(async (formData) => {
     setLoading(true);
     setError(null);
-    await new Promise(r => setTimeout(r, 900));
-    const newUser = {
-      id: Date.now(),
-      ...data,
-      verified: false,
-      rating: 0,
-      totalReviews: 0,
-      avatar: null,
-      plan: 'free',
-    };
-    setUser(newUser);
-    setLoading(false);
-    return { success: true, user: newUser };
+    try {
+      const { data } = await axios.post(`${API_URL}/auth/register`, formData);
+      setUser(data);
+      localStorage.setItem('farmconnect_token', data.token);
+      setLoading(false);
+      return { success: true, user: data };
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to register account.');
+      setLoading(false);
+      return { success: false };
+    }
   }, []);
 
   const logout = useCallback(() => {
+    localStorage.removeItem('farmconnect_token');
     setUser(null);
   }, []);
 

@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   ArrowLeft, MapPin, Calendar, Package, Truck, ShieldCheck,
   Star, MessageCircle, ShoppingCart, Share2, Award, Eye, Heart, Flag, ChevronLeft, ChevronRight
@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext';
 
 export default function ProductDetails() {
   const { id } = useParams();
-  const { products, reviews, addReview, addOrder, categories, addReport, strikes, banned, savedItems, toggleSavedItem, addToast } = useData();
+  const { products, reviews, addReview, addOrder, categories, addReport, strikes, banned, savedItems, toggleSavedItem, addToast, recordView } = useData();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -24,7 +24,7 @@ export default function ProductDetails() {
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
 
-  const product = products.find(p => p.id === Number(id));
+  const product = products.find(p => String(p.id) === id);
   const isSaved = savedItems.includes(product?.id);
   const categoryObj = categories?.find(c => c.name === product?.category);
   const fallbackImg = categoryObj ? categoryObj.image : null;
@@ -35,6 +35,14 @@ export default function ProductDetails() {
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const currentImage = allImages[activeImageIndex] || null;
+
+  const hasViewed = useRef(false);
+  useEffect(() => {
+    if (product && !hasViewed.current) {
+      hasViewed.current = true;
+      recordView(product.id);
+    }
+  }, [product, recordView]);
 
   if (!product) {
     return (
@@ -57,15 +65,11 @@ export default function ProductDetails() {
     return map[cat] || '🌿';
   };
 
-  const handleSendOffer = () => {
+  const handleSendOffer = async () => {
     if (!user) { navigate('/login'); return; }
-    addOrder({
-      buyerId: user.id,
-      buyerName: user.name,
+    await addOrder({
       farmerId: product.farmerId,
-      farmerName: product.farmerName,
       productId: product.id,
-      productTitle: product.title,
       quantity: offerQty,
       offerPrice: offerPrice || product.price,
       note,
@@ -76,7 +80,7 @@ export default function ProductDetails() {
 
   const handleMessage = () => {
     if (!user) { navigate('/login'); return; }
-    navigate('/messages');
+    navigate('/messages', { state: { newConvUserId: product.farmerId, newConvUserName: product.farmerName, newConvFarmName: product.farmName } });
   };
 
   return (
